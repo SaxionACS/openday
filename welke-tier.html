@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Welke TI'er ben jij?</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+</head>
+<body>
+<style>
+/* Layout: één schriftblad, één vraag tegelijk, gedraaide kaartjes als antwoorden. Bewust één papieren look (geen dark mode). */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A;
+  --pen:#24408E; --red:#D23C3C; --mark:rgba(255,214,0,.6); --note:#FFF6B8;
+  --card:#FFFFFF; --tape:rgba(233,215,150,.85);
+  --hand:'Caveat', 'Segoe Print', cursive; --body:'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+html,body{min-height:100%}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(44px,12vw,62px);line-height:.92;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(34px,9vw,44px);line-height:1;text-wrap:balance}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+.dots{display:flex;gap:6px}
+.dot{width:22px;height:8px;border-radius:4px;background:var(--grid);border:1.5px solid var(--ink2)}
+.dot.on{background:var(--pen);border-color:var(--pen)}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt{font:inherit;text-align:left;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);padding:14px 16px;min-height:52px;cursor:pointer;box-shadow:3px 4px 0 rgba(21,32,26,.13);display:flex;gap:12px;align-items:center;transition:transform .15s}
+.opt:nth-child(1){border-radius:6px 18px 8px 14px/14px 8px 18px 6px;transform:rotate(-.6deg)}
+.opt:nth-child(2){border-radius:18px 6px 14px 8px/8px 14px 6px 18px;transform:rotate(.5deg)}
+.opt:nth-child(3){border-radius:8px 14px 6px 18px/18px 6px 14px 8px;transform:rotate(-.4deg)}
+.opt:nth-child(4){border-radius:14px 8px 18px 6px/6px 18px 8px 14px;transform:rotate(.6deg)}
+.opt:hover{transform:rotate(0) translateY(-2px)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.let{font-family:var(--hand);font-weight:700;font-size:28px;color:var(--pen);flex-shrink:0;width:22px}
+.card{position:relative;background:var(--card);border:3px solid var(--ink);border-radius:8px 24px 10px 20px/20px 10px 24px 8px;padding:20px;box-shadow:4px 5px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:10px}
+.note{position:relative;background:var(--note);padding:22px 18px 16px;transform:rotate(-1deg);box-shadow:3px 4px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:8px}
+.note::before{content:"";position:absolute;top:-10px;left:40%;width:70px;height:20px;background:var(--tape);transform:rotate(-3deg)}
+.lbl{font-family:var(--hand);font-weight:700;font-size:26px;color:var(--pen);line-height:1}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.btn{font:inherit;font-family:var(--hand);font-weight:700;font-size:28px;color:#fff;background:var(--ink);border:none;border-radius:10px 22px 10px 18px;padding:10px 22px;min-height:48px;cursor:pointer;align-self:flex-start;transform:rotate(-1deg)}
+.btn.ghost{background:transparent;color:var(--pen);border:2.5px dashed var(--pen)}
+.meter{display:flex;flex-direction:column;gap:6px}
+.mrow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;font-size:15px}
+.bar{height:12px;background:var(--grid);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pen)}
+.red{color:var(--red)}
+@media (prefers-reduced-motion:reduce){.opt{transition:none}}
+</style>
+
+<a href="./" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;display:block;max-width:560px;margin:0 auto 12px">← terug naar het overzicht</a>
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<script>
+const P={
+ knutselaar:{naam:"De knutselaar",kleur:"#C46A00",
+  tekst:"Jij wilt dat iets echt werkt en je wilt het kunnen vastpakken. Je schroeft open, probeert uit en bouwt door tot het beweegt.",
+  bijTI:["de robotauto in jaar 1","microcontrollers programmeren","solderen, meten en testen op echte hardware"],
+  voorbeelden:["Een mini-dronebootje programmeren (Robor Electronics)","Robothond Spot leidingen in de grond laten zoeken (Antea Group)","Een module die per apparaat de stroom meet (Willemsen Installatie)"]},
+ puzzelaar:{naam:"De puzzelaar",kleur:"#24408E",
+  tekst:"Jij rust pas als je snapt waarom iets niet werkt. Een lastige fout vinden voelt voor jou als een overwinning.",
+  bijTI:["debuggen: de fout in je code opsporen","logica en hoe een computer rekent","testen en beveiliging"],
+  voorbeelden:["Software bestoken met rare invoer om fouten te vinden (Thales)","Werkgeheugen veiligstellen voor digitaal onderzoek (FIOD)","Een simulator voor chipontwerpen bouwen (QBayLogic)"]},
+ gamer:{naam:"De gamer die wil weten hoe het werkt",kleur:"#6B3FA0",
+  tekst:"Spelen is leuk, maar jij wilt weten wat erachter zit. Hoe tekent een computer zo snel? Hoe herkent een camera wat hij ziet?",
+  bijTI:["zelf een spelletje programmeren in Programming 2","beeld en AI op kleine apparaten","snelle code die dicht op de hardware zit"],
+  voorbeelden:["Videobeelden verwerken op een grafische kaart (Thales)","Wilde dieren herkennen met een Raspberry Pi (Saxion-onderzoek)","Personen en veiligheidskleding herkennen op bouwplaatsen (BauWatch)"]},
+ wereld:{naam:"De wereldverbeteraar",kleur:"#D23C3C",
+  tekst:"Techniek is voor jou een middel. Je wilt dat het iemand helpt: een patiënt, de natuur of het klimaat.",
+  bijTI:["sensoren die meten wat er met mensen of natuur gebeurt","zuinige apparaten die lang op een batterij werken","projecten met een echte opdrachtgever"],
+  voorbeelden:["Zuinige software voor een draagbare hartmonitor (Diplora)","Een vleermuissensor zuiniger maken (Teneo IoT)","Twee batterijen van 200 kWh bewaken (Easyduurzaam)"]},
+ systeem:{naam:"De systeemdenker",kleur:"#12804A",
+  tekst:"Jij ziet het grote plaatje. Hoe werken honderd onderdelen samen? Waar zit het zwakke punt? Jij houdt het overzicht.",
+  bijTI:["het hele systeem: van sensor tot chip tot app","werken in teams met Scrum","machines, fabrieken en netwerken van apparaten"],
+  voorbeelden:["Software voor de koeling van een chipmachine (ASML)","Een bedieningsscherm voor fabrieksmachines (Van den Bos)","Realtime data verwerken in distributiecentra (Amazon)"]}
+};
+const Q=[
+ {v:"Je krijgt een kapotte radio. Wat doe je?",o:[
+  ["Openschroeven: wat zit erin?",{knutselaar:2,et:1}],
+  ["Stap voor stap uitzoeken waaróm hij het niet doet",{puzzelaar:2}],
+  ["Kijken of ik hem kan ombouwen tot iets slims",{systeem:1,knutselaar:1}],
+  ["Een app zoeken die hetzelfde doet",{ict:2}]]},
+ {v:"Bij een game denk jij vaak:",o:[
+  ["Hoe hebben ze dít gemaakt?",{gamer:2}],
+  ["Ik vind die bug wel",{puzzelaar:2}],
+  ["Kan ik zelf een controller bouwen?",{knutselaar:2}],
+  ["Ik ben liever met iets anders bezig",{wereld:1,systeem:1}]]},
+ {v:"Welk schoolproject vond je het leukst?",o:[
+  ["Iets bouwen of in elkaar zetten",{knutselaar:2}],
+  ["Een moeilijke som of puzzel kraken",{puzzelaar:2}],
+  ["Iets dat de wereld een beetje beter maakt",{wereld:2}],
+  ["Een website of app maken",{ict:2}]]},
+ {v:"Je mag één ding uitvinden.",o:[
+  ["Een robot die mijn kamer opruimt",{knutselaar:1,systeem:1}],
+  ["Een sensor die opa waarschuwt als hij valt",{wereld:2}],
+  ["Een camera die snapt wat hij ziet",{gamer:2}],
+  ["Een slimmer stroomnet",{et:2,wereld:1}]]},
+ {v:"In een groepsproject ben jij degene die…",o:[
+  ["het overzicht houdt",{systeem:2}],
+  ["het lastigste stuk oplost",{puzzelaar:2}],
+  ["het eerste prototype in elkaar zet",{knutselaar:2}],
+  ["zorgt dat het fijn werkt voor de gebruiker",{ict:2}]]},
+ {v:"Wat trekt je het meest?",o:[
+  ["Code die een motor laat draaien",{knutselaar:2}],
+  ["Code die een groot systeem laat samenwerken",{systeem:2}],
+  ["Snappen wat er ín een chip gebeurt",{et:2}],
+  ["Software voor heel veel gebruikers",{ict:2}]]},
+ {v:"Waar zou je later aan willen werken?",o:[
+  ["Robots en drones",{knutselaar:2}],
+  ["Zorg of duurzaamheid",{wereld:2}],
+  ["Games, beeld en AI",{gamer:2}],
+  ["Beveiliging: hackers te slim af zijn",{puzzelaar:2}]]},
+ {v:"Wat vind je het mooist?",o:[
+  ["Iets dat je kunt vastpakken en dat werkt",{knutselaar:2}],
+  ["Een oplossing die precies klopt",{puzzelaar:2}],
+  ["Iets dat mensen echt helpt",{wereld:2}],
+  ["Een machine waarin alles samenwerkt",{systeem:2,gamer:1}]]}
+];
+let i=0, s={};
+const app=document.getElementById('app');
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function start(){
+  app.innerHTML=`<div class="kick">opendag Technische Informatica</div>
+  <h1>Welke <span class="hl">TI'er</span> ben jij?</h1>
+  <p style="margin:0">8 vragen, 2 minuten. Er is geen fout antwoord. Je ziet daarna welk soort TI-student je bent en wat studenten zoals jij echt hebben gebouwd.</p>
+  <div class="note"><div class="lbl">eerlijk is eerlijk</div><div>Past TI misschien níet bij je? Dan zeggen we dat ook.</div></div>
+  <button class="btn" id="go">Begin →</button>
+  <p style="margin:0;font-size:14.5px;color:var(--ink2)">Je antwoorden blijven op je eigen telefoon. Er wordt niets opgeslagen of verstuurd.</p>`;
+  document.getElementById('go').onclick=()=>{i=0;s={};vraag();};
+}
+function vraag(){
+  const q=Q[i];
+  app.innerHTML=`<div class="dots" aria-label="vraag ${i+1} van ${Q.length}">${Q.map((_,k)=>`<span class="dot${k<=i?' on':''}"></span>`).join('')}</div>
+  <div class="kick">vraag ${i+1} van ${Q.length}</div>
+  <h2>${esc(q.v)}</h2>
+  <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="let">${'abcd'[k]}</span><span>${esc(o[0])}</span></button>`).join('')}</div>
+  ${i>0?'<button class="btn ghost" id="back">← vorige</button>':''}`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const add=q.o[+b.dataset.k][1]; q.gekozen=add;
+    for(const k in add) s[k]=(s[k]||0)+add[k];
+    i++; i<Q.length?vraag():uitslag();
+  });
+  const back=document.getElementById('back');
+  if(back) back.onclick=()=>{i--;const prev=Q[i].gekozen||{};for(const k in prev)s[k]-=prev[k];vraag();};
+  app.querySelector('.opt').focus({preventScroll:true});
+}
+function uitslag(){
+  const keys=Object.keys(P);
+  const top=keys.slice().sort((a,b)=>(s[b]||0)-(s[a]||0))[0];
+  const p=P[top]; const max=Math.max(...keys.map(k=>s[k]||0),1);
+  const tiTotaal=keys.reduce((n,k)=>n+(s[k]||0),0);
+  let twijfel='';
+  if((s.ict||0)>=4) twijfel=`<div class="card" style="border-color:var(--pen)"><div class="lbl">Ook goed om te weten</div><div>Je koos vaak voor apps, websites en gebruikers. Dat past ook bij <b>HBO-ICT</b>. Vraag een docent naar het verschil, of loop bij allebei een dag mee.</div></div>`;
+  else if((s.et||0)>=3) twijfel=`<div class="card" style="border-color:#C46A00"><div class="lbl" style="color:#8A4A00">Ook goed om te weten</div><div>Je wilt weten wat er ín de chip en de draad gebeurt. Kijk dan ook eens bij <b>Elektrotechniek</b>. TI zit precies tussen die twee in.</div></div>`;
+  app.innerHTML=`<div class="kick">jouw uitslag</div>
+  <h1 style="color:${p.kleur}">${esc(p.naam)}</h1>
+  <p style="margin:0;font-size:19px">${esc(p.tekst)}</p>
+  <div class="card"><div class="lbl">Hier ga je van genieten bij TI</div><ul>${p.bijTI.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>
+  <div class="note"><div class="lbl">Dit hebben TI-studenten zoals jij gebouwd</div><ul>${p.voorbeelden.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><div style="font-size:14px;color:var(--ink2)">Echte afstudeeropdrachten van de afgelopen jaren.</div></div>
+  <div class="meter" aria-label="jouw scores">${keys.map(k=>`<div class="mrow"><span>${esc(P[k].naam.replace(' die wil weten hoe het werkt',''))}</span><span class="bar"><i style="width:${Math.round((s[k]||0)/max*100)}%;background:${P[k].kleur}"></i></span></div>`).join('')}</div>
+  ${twijfel}
+  <div class="card" style="border-color:var(--red)"><div class="lbl red">En nu?</div><div>Laat deze uitslag zien aan een student of docent hier en vraag wat zij zouden doen. Nog niet zeker? Loop een dag mee met een eerstejaars.</div></div>
+  <button class="btn ghost" id="again">Nog een keer</button>
+  <p style="margin:0;font-size:14.5px;color:var(--ink2)">Er wordt niets opgeslagen of verstuurd.</p>`;
+  document.getElementById('again').onclick=start;
+  window.scrollTo(0,0);
+}
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TI, HBO-ICT of Elektrotechniek?</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+</head>
+<body>
+<style>
+/* Layout: schriftblad met vier schuifjes en een live uitslag eronder. Bewust één papieren look. */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A; --pen:#24408E; --red:#D23C3C;
+  --et:#B35F00; --etbg:#FCE5C4; --ti:#15201A; --tibg:#E6E8EA; --ict:#2F5FD0; --ictbg:#DCE6FB;
+  --card:#FFFFFF; --note:#FFF6B8; --mark:rgba(255,214,0,.6); --tape:rgba(233,215,150,.85);
+  --hand:'Caveat','Segoe Print',cursive; --body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  color-scheme: light;
+}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(42px,10vw,66px);line-height:.92;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(32px,8vw,44px);line-height:1;text-wrap:balance}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+.q{background:var(--card);border:2.5px solid var(--ink);border-radius:8px 22px 10px 18px/18px 10px 22px 8px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:3px 4px 0 rgba(21,32,26,.12)}
+.q:nth-child(odd){transform:rotate(-.4deg)} .q:nth-child(even){transform:rotate(.4deg)}
+.q label{font-family:var(--hand);font-weight:700;font-size:30px;line-height:1}
+.ends{display:flex;justify-content:space-between;gap:16px;font-size:15px;color:var(--ink2)}
+.ends span:last-child{text-align:right}
+.ends2{display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:15px;line-height:1.38;color:var(--ink2)}
+.ends2 div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ends2 div:last-child{text-align:right}
+.ends2 b{color:var(--ink);font-size:16px}
+.ticks{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-top:-6px;padding:0 2px}
+.ticks span:nth-child(3){font-weight:700;color:var(--pen)}
+.stand{font-size:15px;color:var(--pen)}
+input[type=range]{width:100%;height:44px;accent-color:var(--pen);cursor:pointer}
+input[type=range]:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.qs{display:flex;flex-direction:column;gap:16px}
+.line{position:relative;height:86px;margin:0 8px}
+.line .track{position:absolute;left:0;right:0;top:46px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--et),#5B6168 50%,var(--ict))}
+.line .lab{position:absolute;top:0;transform:translateX(-50%);font-family:var(--hand);font-weight:700;font-size:24px;white-space:nowrap}
+.line .you{position:absolute;top:36px;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:var(--note);border:3px solid var(--red);transition:left .25s}
+.line .youlab{position:absolute;top:68px;transform:translateX(-50%);font-family:var(--hand);font-weight:700;font-size:22px;color:var(--red);transition:left .25s}
+.res{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:150px 1fr 52px;gap:12px;align-items:center;font-weight:700}
+.bar{height:22px;background:#E9E4D6;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px;transition:width .25s}
+.pct{font-variant-numeric:tabular-nums;text-align:right}
+.verdict{position:relative;background:var(--note);padding:24px 20px 18px;transform:rotate(-.6deg);box-shadow:4px 5px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:8px}
+.verdict::before{content:"";position:absolute;top:-11px;left:42%;width:80px;height:22px;background:var(--tape);transform:rotate(-3deg)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.cards{grid-template-columns:1fr}}
+.c{background:var(--card);border:2.5px solid;border-radius:8px 18px 10px 14px/14px 10px 18px 8px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.c b{font-family:var(--hand);font-size:28px;line-height:1}
+.c a{color:var(--pen);font-weight:700}
+.small{font-size:14.5px;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){.line .you,.line .youlab,.bar i{transition:none}}
+</style>
+
+<main class="wrap">
+  <a href="./" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;align-self:flex-start">← terug naar het overzicht</a>
+  <div class="kick">opendag Saxion · drie opleidingen naast elkaar</div>
+  <h1>TI, HBO-ICT of <span class="hl">Elektrotechniek?</span></h1>
+  <p style="margin:0">Schuif bij elke vraag naar de kant die het meest bij je past. Vind je allebei even leuk? Laat het schuifje dan in het midden staan, ook dat is een antwoord. De uitslag verandert meteen mee en kan ook een andere opleiding dan TI zijn.</p>
+
+  <div class="qs" id="qs"></div>
+
+  <h2>Hier zit jij</h2>
+  <div class="line" aria-hidden="true">
+    <div class="track"></div>
+    <span class="lab" style="left:12%;color:var(--et)">Elektrotechniek</span>
+    <span class="lab" style="left:48%;color:var(--ti)">TI</span>
+    <span class="lab" style="left:86%;color:var(--ict)">HBO-ICT</span>
+    <span class="you" id="you"></span>
+    <span class="youlab" id="youlab">jij</span>
+  </div>
+
+  <div class="res" id="res" aria-live="polite"></div>
+  <div class="verdict" id="verdict"></div>
+
+  <div class="cards">
+    <div class="c" style="border-color:var(--et)"><b style="color:var(--et)">Elektrotechniek</b><span>Je maakt schakelingen, printplaten, voedingen en signalen. Veel natuurkunde.</span><a href="https://www.saxion.edu/programmes/bachelor/electrical-and-electronic-engineering">opleiding bij Saxion</a><a href="https://www.studiekeuze123.nl/opleidingen/1719-elektrotechniek-saxion-hbo-bachelor" class="small">cijfers op Studiekeuze123</a></div>
+    <div class="c" style="border-color:var(--ti)"><b>Technische Informatica</b><span>Je schrijft software die apparaten, robots en machines aanstuurt.</span><a href="https://www.saxion.nl/opleidingen/voltijd/bachelor/technische-informatica">opleiding bij Saxion</a><a href="https://www.studiekeuze123.nl/opleidingen/1606-technische-informatica-saxion-hbo-bachelor" class="small">cijfers op Studiekeuze123</a></div>
+    <div class="c" style="border-color:var(--ict)"><b style="color:var(--ict)">HBO-ICT</b><span>Je maakt apps, websites, databases en systemen voor mensen en bedrijven.</span><a href="https://www.saxion.nl/opleidingen/en/fulltime/bachelor/hbo-ict">opleiding bij Saxion</a><a href="https://www.studiekeuze123.nl/opleidingen/1628-ict-saxion-hbo-bachelor" class="small">cijfers op Studiekeuze123</a></div>
+  </div>
+  <p class="small" style="margin:0">Er wordt niets opgeslagen of verstuurd. Dit is een gesprekshulp, geen test. Twijfel je tussen twee? Loop bij allebei een dag mee.</p>
+</main>
+
+<script>
+const Q=[
+ {id:"q1",v:"Waar ben je het liefst mee bezig?",
+  l:"Stroom, chips en elektronica",ld:"Schakelingen ontwerpen, printplaten maken, meten met een oscilloscoop, snappen hoe een signaal door een draad gaat.",
+  r:"Software en apps",rd:"Programma's schrijven die op een computer, telefoon of server draaien, met schermen, data en gebruikers."},
+ {id:"q2",v:"Wat geeft je de meeste voldoening?",
+  l:"Iets bouwen dat je kunt vastpakken",ld:"Een robot die rijdt, een apparaat dat piept, een lampje dat gaat branden. Het werkt, en je ziet het.",
+  r:"Iets bedenken en slim organiseren",rd:"Uitzoeken wat mensen nodig hebben, een handige app of website ontwerpen, data overzichtelijk maken."},
+ {id:"q3",v:"Voor wie maak je het?",
+  l:"Voor apparaten en machines",ld:"Je code zit ín een ding: een auto, een fabrieksmachine, een sensor in een weiland. Niemand ziet hem, maar alles werkt erdoor.",
+  r:"Voor de mensen die het gebruiken",rd:"Je maakt iets waar mensen dagelijks op klikken en tikken: een webshop, een rooster-app, een systeem voor een ziekenhuis."},
+ {id:"q4",v:"Hoe leer je het liefst?",
+  l:"Snappen waaróm het werkt",ld:"Formules, natuurkunde en wiskunde: je wilt de theorie achter stroom en signalen echt begrijpen.",
+  r:"Uitproberen tot het werkt",rd:"Iets bouwen, testen, fout gaan, verbeteren. De theorie leer je terwijl je bezig bent."}
+];
+const STAND=["helemaal links","vooral links","een beetje links","allebei even leuk","een beetje rechts","vooral rechts","helemaal rechts"];
+const O={
+ et:{naam:"Elektrotechniek",kleur:"var(--et)",p:[12,30,18,20]},
+ ti:{naam:"TI",kleur:"var(--ti)",p:[50,28,30,60]},
+ ict:{naam:"HBO-ICT",kleur:"var(--ict)",p:[88,70,85,68]}
+};
+const TEKST={
+ et:"Je wilt weten wat er ín de chip en de draad gebeurt. Kijk zeker bij Elektrotechniek. Vind je het programmeren van die chip het leukste deel? Dan zit je bij TI ook goed.",
+ ti:"Jij wilt programmeren én zien dat er iets beweegt. Dat is precies Technische Informatica: software die echte dingen aanstuurt.",
+ ict:"Jij wilt vooral software maken voor mensen en organisaties. Dan past HBO-ICT waarschijnlijk beter. Dat zeggen we gewoon eerlijk. Kijk zeker ook daar."
+};
+const qs=document.getElementById('qs');
+qs.innerHTML=Q.map(q=>`<div class="q"><label for="${q.id}">${q.v}</label>
+<div class="ends2"><div><b>← ${q.l}</b><span>${q.ld}</span></div><div><b>${q.r} →</b><span>${q.rd}</span></div></div>
+<input type="range" id="${q.id}" min="0" max="100" step="1" value="50" aria-describedby="${q.id}-s">
+<div class="ticks" aria-hidden="true"><span>helemaal</span><span>beetje</span><span>allebei</span><span>beetje</span><span>helemaal</span></div>
+<div class="stand" id="${q.id}-s">jouw keuze: <b>allebei even leuk</b></div></div>`).join('');
+function upd(){
+  const v=Q.map(q=>+document.getElementById(q.id).value);
+  Q.forEach((q,i)=>{const s=STAND[Math.round(v[i]/100*6)]; const side=v[i]<50?q.l.toLowerCase():v[i]>50?q.r.toLowerCase():''; document.getElementById(q.id+'-s').innerHTML='jouw keuze: <b>'+(side&&s!=="allebei even leuk"?s.replace(/ (links|rechts)$/,'')+': '+side:'allebei even leuk')+'</b>';});
+  const score={};
+  for(const k in O){ const d=Math.sqrt(O[k].p.reduce((s,p,i)=>s+(p-v[i])**2,0)/4); score[k]=Math.max(0,Math.round(100-d*1.25)); }
+  const order=Object.keys(O).sort((a,b)=>score[b]-score[a]);
+  document.getElementById('res').innerHTML=order.map(k=>`<div class="row"><span style="color:${O[k].kleur}">${O[k].naam}</span><span class="bar"><i style="width:${score[k]}%;background:${O[k].kleur}"></i></span><span class="pct">${score[k]}%</span></div>`).join('');
+  const x=Math.min(96,Math.max(4,(v[0]*0.6+v[2]*0.4)));
+  document.getElementById('you').style.left=x+'%'; document.getElementById('youlab').style.left=x+'%';
+  const [a,b]=order; let t;
+  if(v.every(n=>n===50)) t="<b>Schuif maar!</b> Alles staat nu in het midden. Zet elk schuifje naar de kant die het meest bij je past.";
+  else if(score[a]-score[b]<6) t=`<b>Je zit tussen ${O[a].naam} en ${O[b].naam} in.</b> Prima, dat hebben veel mensen. Vraag hier een student van allebei wat ze op een gewone dag doen.`;
+  else t=`<b>Jouw beste match: ${O[a].naam}.</b> ${TEKST[a]}`;
+  document.getElementById('verdict').innerHTML=t;
+}
+qs.addEventListener('input',upd); upd();
+</script>
+</body>
+</html>
