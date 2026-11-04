@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Which TI type are you?</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+</head>
+<body>
+<style>
+/* Layout: één schriftblad, één vraag tegelijk, gedraaide kaartjes als antwoorden. Bewust één papieren look (geen dark mode). */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A;
+  --pen:#24408E; --red:#D23C3C; --mark:rgba(255,214,0,.6); --note:#FFF6B8;
+  --card:#FFFFFF; --tape:rgba(233,215,150,.85);
+  --hand:'Caveat', 'Segoe Print', cursive; --body:'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+html,body{min-height:100%}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(44px,12vw,62px);line-height:.92;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(34px,9vw,44px);line-height:1;text-wrap:balance}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+.dots{display:flex;gap:6px}
+.dot{width:22px;height:8px;border-radius:4px;background:var(--grid);border:1.5px solid var(--ink2)}
+.dot.on{background:var(--pen);border-color:var(--pen)}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt{font:inherit;text-align:left;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);padding:14px 16px;min-height:52px;cursor:pointer;box-shadow:3px 4px 0 rgba(21,32,26,.13);display:flex;gap:12px;align-items:center;transition:transform .15s}
+.opt:nth-child(1){border-radius:6px 18px 8px 14px/14px 8px 18px 6px;transform:rotate(-.6deg)}
+.opt:nth-child(2){border-radius:18px 6px 14px 8px/8px 14px 6px 18px;transform:rotate(.5deg)}
+.opt:nth-child(3){border-radius:8px 14px 6px 18px/18px 6px 14px 8px;transform:rotate(-.4deg)}
+.opt:nth-child(4){border-radius:14px 8px 18px 6px/6px 18px 8px 14px;transform:rotate(.6deg)}
+.opt:hover{transform:rotate(0) translateY(-2px)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.let{font-family:var(--hand);font-weight:700;font-size:28px;color:var(--pen);flex-shrink:0;width:22px}
+.card{position:relative;background:var(--card);border:3px solid var(--ink);border-radius:8px 24px 10px 20px/20px 10px 24px 8px;padding:20px;box-shadow:4px 5px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:10px}
+.note{position:relative;background:var(--note);padding:22px 18px 16px;transform:rotate(-1deg);box-shadow:3px 4px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:8px}
+.note::before{content:"";position:absolute;top:-10px;left:40%;width:70px;height:20px;background:var(--tape);transform:rotate(-3deg)}
+.lbl{font-family:var(--hand);font-weight:700;font-size:26px;color:var(--pen);line-height:1}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.btn{font:inherit;font-family:var(--hand);font-weight:700;font-size:28px;color:#fff;background:var(--ink);border:none;border-radius:10px 22px 10px 18px;padding:10px 22px;min-height:48px;cursor:pointer;align-self:flex-start;transform:rotate(-1deg)}
+.btn.ghost{background:transparent;color:var(--pen);border:2.5px dashed var(--pen)}
+.meter{display:flex;flex-direction:column;gap:6px}
+.mrow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;font-size:15px}
+.bar{height:12px;background:var(--grid);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pen)}
+.red{color:var(--red)}
+@media (prefers-reduced-motion:reduce){.opt{transition:none}}
+</style>
+
+<div style="display:flex;justify-content:space-between;gap:12px;max-width:560px;margin:0 auto 12px"><a href="./samenvatting-en.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">← back to the overview</a><a href="welke-tier.html" lang="nl" hreflang="nl" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">Nederlands</a></div>
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<script>
+const P={
+ knutselaar:{naam:"The tinkerer",kleur:"#C46A00",
+  tekst:"You want something that really works and that you can hold. You open things up, try things out and keep building until it moves.",
+  bijTI:["the robot car in year 1","programming microcontrollers","soldering, measuring and testing on real hardware"],
+  voorbeelden:["Programming a mini drone boat (Robor Electronics)","Getting robot dog Spot to find pipes underground (Antea Group)","A module that measures the power use of each device (Willemsen Installatie)"]},
+ puzzelaar:{naam:"The puzzler",kleur:"#24408E",
+  tekst:"You don't rest until you understand why something doesn't work. Finding a tricky bug feels like a victory to you.",
+  bijTI:["debugging: tracking down the bug in your code","logic and how a computer calculates","testing and security"],
+  voorbeelden:["Bombarding software with strange input to find bugs (Thales)","Securing working memory for digital forensics (FIOD)","Building a simulator for chip designs (QBayLogic)"]},
+ gamer:{naam:"The gamer who wants to know how it works",kleur:"#6B3FA0",
+  tekst:"Playing is fun, but you want to know what's behind it. How does a computer draw so fast? How does a camera recognise what it sees?",
+  bijTI:["programming your own game in Programming 2","images and AI on small devices","fast code that runs close to the hardware"],
+  voorbeelden:["Processing video on a graphics card (Thales)","Recognising wild animals with a Raspberry Pi (Saxion research)","Recognising people and safety clothing on building sites (BauWatch)"]},
+ wereld:{naam:"The world improver",kleur:"#D23C3C",
+  tekst:"For you, technology is a means to an end. You want it to help someone: a patient, nature or the climate.",
+  bijTI:["sensors that measure what happens to people or nature","low-power devices that run on a battery for a long time","projects for a real client"],
+  voorbeelden:["Low-power software for a wearable heart monitor (Diplora)","Making a bat sensor use less power (Teneo IoT)","Monitoring two 200 kWh batteries (Easyduurzaam)"]},
+ systeem:{naam:"The systems thinker",kleur:"#12804A",
+  tekst:"You see the big picture. How do a hundred parts work together? Where is the weak spot? You keep the overview.",
+  bijTI:["the whole system: from sensor to chip to app","working in teams with Scrum","machines, factories and networks of devices"],
+  voorbeelden:["Software for the cooling of a chip machine (ASML)","A control screen for factory machines (Van den Bos)","Processing real-time data in distribution centres (Amazon)"]}
+};
+const Q=[
+ {v:"You get a broken radio. What do you do?",o:[
+  ["Open it up: what's inside?",{knutselaar:2,et:1}],
+  ["Work out step by step why it doesn't work",{puzzelaar:2}],
+  ["See if I can turn it into something smart",{systeem:1,knutselaar:1}],
+  ["Look for an app that does the same",{ict:2}]]},
+ {v:"When playing a game, you often think:",o:[
+  ["How did they make this?",{gamer:2}],
+  ["I'll find that bug",{puzzelaar:2}],
+  ["Could I build my own controller?",{knutselaar:2}],
+  ["I'd rather be doing something else",{wereld:1,systeem:1}]]},
+ {v:"Which school project did you enjoy most?",o:[
+  ["Building or assembling something",{knutselaar:2}],
+  ["Cracking a hard problem or puzzle",{puzzelaar:2}],
+  ["Something that makes the world a bit better",{wereld:2}],
+  ["Making a website or app",{ict:2}]]},
+ {v:"You may invent one thing.",o:[
+  ["A robot that tidies my room",{knutselaar:1,systeem:1}],
+  ["A sensor that raises the alarm when grandpa falls",{wereld:2}],
+  ["A camera that understands what it sees",{gamer:2}],
+  ["A smarter power grid",{et:2,wereld:1}]]},
+ {v:"In a group project, you are the one who…",o:[
+  ["keeps the overview",{systeem:2}],
+  ["solves the hardest part",{puzzelaar:2}],
+  ["puts the first prototype together",{knutselaar:2}],
+  ["makes sure it works nicely for the user",{ict:2}]]},
+ {v:"What appeals to you most?",o:[
+  ["Code that makes a motor turn",{knutselaar:2}],
+  ["Code that makes a big system work together",{systeem:2}],
+  ["Understanding what goes on inside a chip",{et:2}],
+  ["Software for lots and lots of users",{ict:2}]]},
+ {v:"What would you like to work on later?",o:[
+  ["Robots and drones",{knutselaar:2}],
+  ["Healthcare or sustainability",{wereld:2}],
+  ["Games, images and AI",{gamer:2}],
+  ["Security: outsmarting hackers",{puzzelaar:2}]]},
+ {v:"What do you find most beautiful?",o:[
+  ["Something you can hold that works",{knutselaar:2}],
+  ["A solution that is exactly right",{puzzelaar:2}],
+  ["Something that really helps people",{wereld:2}],
+  ["A machine in which everything works together",{systeem:2,gamer:1}]]}
+];
+let i=0, s={};
+const app=document.getElementById('app');
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function start(){
+  app.innerHTML=`<div class="kick">Saxion open day · Technische Informatica (TI)</div>
+  <h1>Which <span class="hl">TI type</span> are you?</h1>
+  <p style="margin:0">8 questions, 2 minutes. There are no wrong answers. Afterwards you see what kind of TI student you are and what students like you have really built.</p>
+  <div class="note"><div class="lbl">to be honest</div><div>Maybe TI does not suit you? Then we will say so too.</div></div>
+  <button class="btn" id="go">Start →</button>
+  <p style="margin:0;font-size:14.5px;color:var(--ink2)">Your answers stay on your own phone. Nothing is stored or sent.</p>`;
+  document.getElementById('go').onclick=()=>{i=0;s={};vraag();};
+}
+function vraag(){
+  const q=Q[i];
+  app.innerHTML=`<div class="dots" aria-label="question ${i+1} of ${Q.length}">${Q.map((_,k)=>`<span class="dot${k<=i?' on':''}"></span>`).join('')}</div>
+  <div class="kick">question ${i+1} of ${Q.length}</div>
+  <h2>${esc(q.v)}</h2>
+  <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="let">${'abcd'[k]}</span><span>${esc(o[0])}</span></button>`).join('')}</div>
+  ${i>0?'<button class="btn ghost" id="back">← previous</button>':''}`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const add=q.o[+b.dataset.k][1]; q.gekozen=add;
+    for(const k in add) s[k]=(s[k]||0)+add[k];
+    i++; i<Q.length?vraag():uitslag();
+  });
+  const back=document.getElementById('back');
+  if(back) back.onclick=()=>{i--;const prev=Q[i].gekozen||{};for(const k in prev)s[k]-=prev[k];vraag();};
+  app.querySelector('.opt').focus({preventScroll:true});
+}
+function uitslag(){
+  const keys=Object.keys(P);
+  const top=keys.slice().sort((a,b)=>(s[b]||0)-(s[a]||0))[0];
+  const p=P[top]; const max=Math.max(...keys.map(k=>s[k]||0),1);
+  const tiTotaal=keys.reduce((n,k)=>n+(s[k]||0),0);
+  let twijfel='';
+  if((s.ict||0)>=4) twijfel=`<div class="card" style="border-color:var(--pen)"><div class="lbl">Also good to know</div><div>You often chose apps, websites and users. That also fits <b>HBO-ICT</b>. Ask a lecturer about the difference, or spend a trial day at both.</div></div>`;
+  else if((s.et||0)>=3) twijfel=`<div class="card" style="border-color:#C46A00"><div class="lbl" style="color:#8A4A00">Also good to know</div><div>You want to know what goes on inside the chip and the wire. Then also take a look at <b>Electrical Engineering</b>. TI sits right between the two.</div></div>`;
+  app.innerHTML=`<div class="kick">your result</div>
+  <h1 style="color:${p.kleur}">${esc(p.naam)}</h1>
+  <p style="margin:0;font-size:19px">${esc(p.tekst)}</p>
+  <div class="card"><div class="lbl">What you will enjoy at TI</div><ul>${p.bijTI.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>
+  <div class="note"><div class="lbl">TI students like you built this</div><ul>${p.voorbeelden.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><div style="font-size:14px;color:var(--ink2)">Real graduation projects from recent years.</div></div>
+  <div class="meter" aria-label="your scores">${keys.map(k=>`<div class="mrow"><span>${esc(P[k].naam.replace(' who wants to know how it works',''))}</span><span class="bar"><i style="width:${Math.round((s[k]||0)/max*100)}%;background:${P[k].kleur}"></i></span></div>`).join('')}</div>
+  ${twijfel}
+  <div class="card" style="border-color:var(--red)"><div class="lbl red">What now?</div><div>Show this result to a student or lecturer here and ask what they would do. Not sure yet? Spend a day with a first-year student.</div></div>
+  <button class="btn ghost" id="again">Try again</button>
+  <p style="margin:0;font-size:14.5px;color:var(--ink2)">Nothing is stored or sent.</p>`;
+  document.getElementById('again').onclick=start;
+  window.scrollTo(0,0);
+}
+start();
+</script>
+</body>
+</html>

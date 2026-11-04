@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TI open day · a look back</title>
+<meta name="description" content="Summary of the Technische Informatica open day at Saxion Enschede, 7 November 2026.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: één schriftblad om op de telefoon door te scrollen. Zelfde papieren stijl als de posters op de opendag. */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A; --pen:#24408E; --red:#D23C3C;
+  --ok:#12804A; --okbg:#EEF8F1; --et:#B35F00; --ict:#2F5FD0; --paars:#6B3FA0;
+  --card:#FFFFFF; --note:#FFF6B8; --mark:rgba(255,214,0,.6); --tape:rgba(233,215,150,.85);
+  --hand:'Caveat','Segoe Print',cursive; --body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding:20px max(16px,env(safe-area-inset-right,0px)) 56px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:12px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left;line-height:1.1}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(50px,13vw,78px);line-height:.9;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(38px,9.5vw,52px);line-height:1;text-wrap:balance}
+h3{margin:0;font-family:var(--hand);font-weight:700;font-size:30px;line-height:1}
+p{margin:0}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+a{color:var(--pen);font-weight:700;text-underline-offset:3px}
+a:focus-visible{outline:3px solid var(--pen);outline-offset:3px;border-radius:4px}
+.small{font-size:14.5px;color:var(--ink2)}
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-family:var(--hand);font-size:22px;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:6px 14px 8px 12px/12px 8px 14px 6px;padding:2px 12px;min-height:40px;display:inline-flex;align-items:center}
+.card{background:var(--card);border:2.5px solid var(--ink);border-radius:8px 22px 10px 18px/18px 10px 22px 8px;padding:16px 18px;box-shadow:3px 4px 0 rgba(21,32,26,.12);display:flex;flex-direction:column;gap:6px}
+.note{position:relative;background:var(--note);padding:22px 18px 16px;box-shadow:3px 4px 0 rgba(21,32,26,.12);transform:rotate(-.6deg);display:flex;flex-direction:column;gap:8px}
+.note::before{content:"";position:absolute;top:-10px;left:42%;width:70px;height:20px;background:var(--tape);transform:rotate(-3deg)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:6px;align-items:center;text-align:center}
+.flow div{background:var(--card);border:2.5px solid var(--ink);border-radius:10px;padding:8px 6px;font-size:14.5px;line-height:1.25}
+.flow b{display:block;font-family:var(--hand);font-size:26px;line-height:1}
+.flow span{font-family:var(--hand);font-size:28px;color:var(--pen)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:600px){.three{grid-template-columns:1fr}}
+.three .card{gap:4px}
+.games{display:flex;flex-direction:column;gap:12px}
+.game{display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--ink);font-weight:400;background:var(--card);border:2.5px solid var(--ink);border-radius:10px 22px 8px 18px/18px 8px 22px 10px;padding:12px 16px;box-shadow:3px 4px 0 rgba(21,32,26,.12);min-height:64px}
+.game:nth-child(odd){transform:rotate(-.5deg)} .game:nth-child(even){transform:rotate(.5deg)}
+.game .t{font-family:var(--hand);font-weight:700;font-size:30px;line-height:1}
+.game .m{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--ok)}
+.game .arr{margin-left:auto;font-family:var(--hand);font-size:34px;color:var(--pen)}
+.jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:600px){.jobs{grid-template-columns:1fr}}
+.jobs .card{border-color:var(--ok);gap:2px}
+.jobs .card b{font-family:var(--hand);font-size:26px;line-height:1.05}
+.jobs .card span{font-size:15px;line-height:1.4}
+.nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.num{background:var(--card);border:2.5px solid var(--pen);border-radius:8px 18px 10px 14px/14px 10px 18px 8px;padding:10px 14px}
+.num b{display:block;font-family:var(--hand);font-size:44px;line-height:.95}
+.num span{font-size:14.5px;line-height:1.3;display:block}
+.num.groen{border-color:var(--ok)}
+.num.wide{grid-column:span 2}
+.sub{font-family:var(--hand);font-weight:700;font-size:30px;line-height:1;margin-top:6px}
+ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.check{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.check li{display:flex;gap:10px;align-items:flex-start}
+.check li::before{content:"";flex-shrink:0;width:18px;height:18px;border:2.5px solid var(--ink);border-radius:4px;margin-top:3px;background:#fff}
+.myth{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1.5px dashed #9AA6B2}
+.myth:last-child{border-bottom:none}
+.myth s{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1.05;text-decoration-color:var(--red);text-decoration-thickness:3px}
+.myth span{color:var(--pen);font-weight:700}
+.cta{display:flex;flex-direction:column;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-family:var(--hand);font-weight:700;font-size:30px;color:#fff;background:var(--ink);text-decoration:none;border-radius:10px 22px 10px 18px;padding:8px 22px;min-height:52px;transform:rotate(-1deg)}
+.btn.ghost{background:transparent;color:var(--pen);border:2.5px dashed var(--pen)}
+.bron{font-size:14px;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.bron a{font-weight:700}
+footer{border-top:2.5px solid var(--ink);padding-top:14px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><div class="kick">open day Technische Informatica · Saxion Enschede · 7 November 2026</div><a href="samenvatting.html" lang="nl" hreflang="nl" style="font-size:15px;white-space:nowrap">Nederlands</a></div>
+  <h1>A look <span class="hl">back</span></h1>
+  <p>Great that you came. Here is everything from the open day in one place: the quiz, Build a system and the choice helper, what you can become, the figures and the questions to discuss at home. Read it together with whoever came with you. Still have a question? <a href="#vraag">Ask it here</a>.</p>
+  <nav class="toc" aria-label="on this page">
+    <a href="#ti">What is TI?</a><a href="#probeer">Try it yourself</a><a href="#worden">Careers</a><a href="#cijfers">Figures</a><a href="#aankunnen">Can I do it?</a><a href="#thuis">Questions</a><a href="#verder">Trial day</a><a href="#vraag">Ask a question</a>
+  </nav>
+</header>
+
+<section id="ti" aria-labelledby="h-ti">
+  <h2 id="h-ti">What is TI?</h2>
+  <p>Almost everything around you contains a tiny computer: your bike light, the payment terminal, a car or a pacemaker. It measures something, decides and controls something. That is called an <b>embedded system</b>. At Technische Informatica (TI) you write the software that does this.</p>
+  <div class="flow" aria-label="measure, decide, act">
+    <div><b>measure</b>a sensor</div><span aria-hidden="true">→</span>
+    <div><b>decide</b>your code on a chip</div><span aria-hidden="true">→</span>
+    <div><b>act</b>motor, light or screen</div>
+  </div>
+  <h3 style="margin-top:8px">TI, HBO-ICT or Electrical Engineering?</h3>
+  <div class="three">
+    <div class="card" style="border-color:var(--et)"><b style="font-family:var(--hand);font-size:28px;color:#8A4A00;line-height:1">Electrical Engineering</b><span style="font-size:15px">Circuits, circuit boards and signals. You want to know what goes on inside the chip and the wire.</span></div>
+    <div class="card" style="border-width:3.5px"><b style="font-family:var(--hand);font-size:28px;line-height:1">Technische Informatica</b><span style="font-size:15px">Code for microcontrollers, robots and machines. You want to program and see something move.</span></div>
+    <div class="card" style="border-color:var(--ict)"><b style="font-family:var(--hand);font-size:28px;color:#1E3F96;line-height:1">HBO-ICT</b><span style="font-size:15px">Apps, websites and systems for companies. You mainly work with software, data and users.</span></div>
+  </div>
+  <p class="small">Not sure? Choose by what you most like to make. The choice helper below can help.</p>
+</section>
+
+<section id="probeer" aria-labelledby="h-probeer">
+  <h2 id="h-probeer">Try it (again) yourself</h2>
+  <div class="games">
+    <a class="game" href="bouw-een-systeem-en.html"><div><div class="m">GAME · 6 MINUTES</div><div class="t">Build a system</div><div style="font-size:15px">Six smart systems, from doorbell to dike monitoring.</div></div><span class="arr" aria-hidden="true">→</span></a>
+    <a class="game" href="welke-tier-en.html"><div><div class="m" style="color:var(--paars)">QUIZ · 2 MINUTES</div><div class="t">Which TI type are you?</div><div style="font-size:15px">Tinkerer, puzzler or world improver?</div></div><span class="arr" aria-hidden="true">→</span></a>
+    <a class="game" href="keuzehulp-en.html"><div><div class="m" style="color:var(--pen)">CHOICE HELPER · 1 MINUTE</div><div class="t">TI, HBO-ICT or EE?</div><div style="font-size:15px">Four sliders. Even if the answer is not TI.</div></div><span class="arr" aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<section id="worden" aria-labelledby="h-worden">
+  <h2 id="h-worden">What can you become?</h2>
+  <div class="jobs">
+    <div class="card"><b>Embedded software engineer</b><span>Software inside a device. Graduation project: low-power firmware for a wearable heart monitor (Diplora).</span></div>
+    <div class="card"><b>Software engineer</b><span>Building large systems in a team. Graduation project: real-time data in distribution centres (Amazon).</span></div>
+    <div class="card"><b>Robotics &amp; automation engineer</b><span>Making robots and machines work on their own. Graduation project: an unmanned vehicle that recognises holes in the ground (Demcon).</span></div>
+    <div class="card"><b>AI &amp; vision engineer</b><span>Teaching cameras to understand what they see. Graduation project: recognising safety clothing on building sites (BauWatch).</span></div>
+    <div class="card"><b>Test engineer</b><span>Proving that software does what it should. Graduation project: bombarding software with strange input (Thales).</span></div>
+    <div class="card"><b>Security specialist</b><span>Keeping devices and data safe. Graduation project: securing working memory for digital forensics (FIOD).</span></div>
+  </div>
+  <p>What will you work on? For example self-driving systems, medical technology, energy, security or robotics. In year 2 you choose an elective line: <b>Embedded Systems</b>, <b>Intelligent Systems</b> or <b>Signal Processing Systems</b>. After that come an internship, a minor and your graduation project.</p>
+</section>
+
+<section id="cijfers" aria-labelledby="h-cijfers">
+  <h2 id="h-cijfers">The figures, honestly</h2>
+  <div class="sub">After graduating</div>
+  <p class="small">TI graduates across the Netherlands, 1.5 years after graduating.</p>
+  <div class="nums">
+    <div class="num groen wide"><b>€ 3,200</b><span>estimated starting salary, gross per month (average for all Dutch universities of applied sciences: € 2,773). As an experienced embedded engineer: around € 4,000 to € 6,500.</span></div>
+    <div class="num"><b>88%</b><span>works at bachelor level</span></div>
+    <div class="num"><b>3 mo</b><span>on average to a real job</span></div>
+    <div class="num"><b>71%</b><span>has a permanent contract</span></div>
+    <div class="num"><b>84%</b><span>would choose TI again</span></div>
+  </div>
+  <div class="note">
+    <h3>The honest story about jobs</h3>
+    <p>ROA expects fewer opportunities in computing and ICT in general up to 2028. At the same time, the Dutch employment agency UWV lists <b>embedded software engineers</b> and industrial automation as promising in the Twente region. So software that controls devices and machines is in demand here. That is exactly what TI prepares you for.</p>
+  </div>
+  <div class="sub">TI at Saxion</div>
+  <p class="small">Full-time, Enschede.</p>
+  <div class="nums">
+    <div class="num"><b>3.7</b><span>overall student satisfaction, scale 1–5 (national TI average: 3.7)</span></div>
+    <div class="num"><b>4.0</b><span>atmosphere (national: 4.1)</span></div>
+    <div class="num"><b>57%</b><span>continues to year 2 (national: 61%)</span></div>
+    <div class="num"><b>27%</b><span>graduates within 5 years (plus 4% with another degree)</span></div>
+    <div class="num"><b>93</b><span>first-year students in 2025, 17% of them women</span></div>
+    <div class="num"><b>37%</b><span>finds the workload too high (national: 36%)</span></div>
+  </div>
+  <div class="note" style="transform:rotate(.5deg)">
+    <h3>To be honest</h3>
+    <p>Year 1 is tough: more than 4 in 10 first-year students do not continue to year 2 of TI. That is why every first-year student has a fixed home group and a study coach who keeps an eye on them, so you know in time where you stand.</p>
+  </div>
+  <div class="bron">
+    <span>Sources (in Dutch), as of November 2026:</span>
+    <a href="https://www.studiekeuze123.nl/opleidingen/1606-technische-informatica-saxion-hbo-bachelor">Studiekeuze123: TI at Saxion (NSE 2026, DUO, HBO-monitor, ROA)</a>
+    <a href="https://www.uwv.nl/assets-kai/files/553a9cae-3040-4ae5-aff6-f21270457fbf/regionaal-kansrijke-beroepen-2026-2027-twente.pdf">UWV: promising occupations Twente 2026–2027 (pdf)</a>
+    <a href="https://www.nationaleberoepengids.nl/salaris/embedded-engineer">Nationale Beroepengids: salary of an embedded engineer</a>
+  </div>
+</section>
+
+<section id="aankunnen" aria-labelledby="h-aankunnen">
+  <h2 id="h-aankunnen">Can I do it?</h2>
+  <div class="card">
+    <h3 style="font-size:28px">Admission</h3>
+    <ul class="plain">
+      <li><b>havo</b> with N&amp;T, N&amp;G or E&amp;M: direct admission. With C&amp;M: with maths A or B.</li>
+      <li><b>vwo</b>: with any profile.</li>
+      <li><b>mbo 4</b>: with any mbo level 4 programme.</li>
+    </ul>
+    <p class="small">These are Dutch diplomas. Any additional requirements, also for international diplomas, are on saxion.nl.</p>
+  </div>
+  <div class="card" style="border-color:var(--red)">
+    <h3 style="font-size:28px;color:var(--red)">What is hard?</h3>
+    <ul class="plain">
+      <li><b>The pace.</b> Programming moves fast from week 1. You need to practise every week.</li>
+      <li><b>Planning yourself.</b> About 17 hours of classes and 23 hours of self-study per week.</li>
+      <li><b>Maths and electronics</b>, especially if you have not done them for a while. Ask for help in time.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="font-size:28px">A few myths</h3>
+    <div class="myth"><s>"You need to be able to program already."</s><span>In Programming 1 you simply start from zero.</span></div>
+    <div class="myth"><s>"You need to be a maths genius."</s><span>You learn to apply maths. Perseverance counts more than talent.</span></div>
+    <div class="myth"><s>"You sit still behind a screen all day."</s><span>You solder, measure, test and make robots drive.</span></div>
+    <div class="myth"><s>"AI will take over this work."</s><span>AI writes code. Someone has to understand what happens inside the chip.</span></div>
+  </div>
+</section>
+
+<section id="thuis" aria-labelledby="h-thuis">
+  <h2 id="h-thuis">Questions for <span class="hl">at home</span></h2>
+  <p>Talk them through within a week, while it is still fresh.</p>
+  <div class="card" style="border-color:var(--paars)">
+    <h3 style="color:var(--paars)">for you</h3>
+    <ul class="check">
+      <li>At which table did you lose track of time?</li>
+      <li>What would you like to try making yourself now?</li>
+      <li>Can you picture a 40-hour week like this?</li>
+      <li>What sounded exciting or difficult?</li>
+    </ul>
+  </div>
+  <div class="card" style="border-color:#C2582A">
+    <h3 style="color:#C2582A">together</h3>
+    <ul class="check">
+      <li>What struck us about the students we spoke to?</li>
+      <li>Which question did we forget to ask?</li>
+      <li>How did this compare with other open days?</li>
+    </ul>
+  </div>
+</section>
+
+<section id="verder" aria-labelledby="h-verder">
+  <h2 id="h-verder">What now?</h2>
+  <div class="cta">
+    <p>Not sure yet? <b>Spend a day</b> with a first-year student. You will see what an ordinary day of classes looks like and build something yourself.</p>
+    <a class="btn" href="https://www.saxion.nl/opleidingen/voltijd/bachelor/technische-informatica/proefstuderen">Trial day at TI (Dutch) →</a>
+    <a class="btn ghost" href="https://www.saxion.nl/opleidingen/voltijd/bachelor/technische-informatica">All about the programme (Dutch)</a>
+  </div>
+</section>
+
+<section id="vraag" aria-labelledby="h-vraag">
+  <div class="note" style="transform:rotate(.4deg)">
+    <h2 id="h-vraag" style="font-size:clamp(34px,8.5vw,44px)">Still have a question?</h2>
+    <p>Did it only occur to you at home, or did you not dare to ask on Saturday? Ask it using the form. You may write in English. Fill in your email address if you would like an answer and a TI lecturer will reply.</p>
+    <a class="btn" href="https://edu.nl/ujgk6" style="margin-top:4px">Ask your question →</a>
+  </div>
+</section>
+
+<footer>
+  <p class="small">Technische Informatica programme, Saxion Enschede. Figures as of November 2026.</p>
+  <p class="small">This page has no tracking and no cookies. Nothing is recorded about who visits it. What you fill in on the question form is only seen by the TI team.</p>
+</footer>
+</main>
+</body>
+</html>
