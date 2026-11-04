@@ -21,7 +21,7 @@ body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,tr
 h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(46px,10vw,72px);line-height:.92;text-wrap:balance}
 h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(30px,7vw,40px);line-height:1}
 .hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
-.tabs{display:flex;flex-wrap:wrap;gap:10px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;position:relative}
 .tab{font:inherit;font-family:var(--hand);font-weight:700;font-size:26px;padding:6px 16px;min-height:46px;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:8px 18px 8px 14px;cursor:pointer}
 .tab[aria-pressed="true"]{background:var(--ink);color:#fff}
 .tab .done{color:var(--ok)}
@@ -76,6 +76,7 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 .puzzels ol{margin:8px 0 6px;padding-left:22px;display:flex;flex-direction:column;gap:8px}
 .puzzels .leuk{font-family:var(--hand);font-weight:700;font-size:24px;line-height:1.1;color:var(--ok)}
 [hidden]{display:none !important}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:6px 2px;min-height:32px;white-space:nowrap}
 .finale{position:relative;background:var(--card);border:3.5px solid var(--ink);border-radius:12px 26px 10px 22px/22px 10px 26px 12px;padding:22px 20px 20px;box-shadow:5px 6px 0 rgba(21,32,26,.15);display:flex;flex-direction:column;gap:12px;transform:rotate(.4deg)}
 .finale h2{font-size:clamp(36px,8vw,52px)}
 .finale p{margin:0;max-width:62ch}
@@ -135,7 +136,7 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 
 <main class="wrap" lang="nl">
   <a href="./samenvatting.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;align-self:flex-start">← terug naar het overzicht</a>
-  <div class="kick">opendag Technische Informatica</div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="kick">opendag Technische Informatica</div><a class="taal" href="bouw-een-systeem-en.html" lang="en" hreflang="en">English</a></div>
   <h1>Bouw een <span class="hl">systeem</span></h1>
   <p class="intro-short">Elk slim apparaat <b>neemt waar</b>, <b>denkt</b>, <b>doet</b> iets, <b>stuurt</b> het door en <b>laat het zien</b>. Tik een onderdeel onderin en dan het vakje waar het hoort.</p>
   <p class="intro-long" style="margin:0;max-width:62ch">Elk slim apparaat heeft dezelfde vijf stappen: iets <b>waarnemen</b>, erover <b>denken</b>, iets <b>doen</b>, het <b>doorsturen</b> en het <b>laten zien</b>. Zet de juiste onderdelen op hun plek. Sleep ze, of tik eerst een onderdeel en dan een vakje.</p>
@@ -154,7 +155,7 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 <main class="wrap" id="badgeview" lang="nl" hidden>
   <div class="kick">opendag Technische Informatica</div>
   <h1>Jouw <span class="hl">badge</span></h1>
-  <p style="margin:0">Je bouwde alle negen slimme systemen in het spel <b>Bouw een systeem</b>. Zet je naam erop en bewaar hem.</p>
+  <p style="margin:0">Je bouwde alle zes slimme systemen in het spel <b>Bouw een systeem</b>. Zet je naam erop en bewaar hem.</p>
   <div id="badgeslot"></div>
   <p class="small" style="margin:0">Je naam wordt nergens opgeslagen of verstuurd. Hij staat alleen op de afbeelding die je zelf bewaart.</p>
 </main>
@@ -218,13 +219,6 @@ const SYS=[
    {ok:"tril",hint:"De drager moet het merken, ook in een drukke ruimte.",why:"Een trilling waarschuwt zonder dat de hele kamer het hoort."},
    {ok:"bt",hint:"Wifi kost te veel stroom voor zo'n klein apparaatje.",why:"Bluetooth is zuinig. Een TI-student studeerde hier echt op af, bij Diplora."},
    {ok:"app",hint:"De drager wil zijn hartslag op zijn eigen telefoon zien.",why:"De app laat de metingen zien en kan ze doorsturen naar de arts."}]},
- {id:"thermostaat",naam:"Slimme thermostaat",extra:["vocht","laptop","motor","lora","dash"],doel:"Een thermostaat die de kamer precies warm genoeg maakt en die je vanaf je telefoon bedient.",
-  slots:[
-   {ok:"temp",hint:"De thermostaat moet weten hoe warm het in de kamer is.",why:"TI leest de sensor elke paar seconden uit en middelt de metingen, zodat één tochtvlaag niets verpest."},
-   {ok:"chip",hint:"Het brein zit in een klein kastje aan de muur.",why:"De microcontroller vergelijkt: 17 graden, maar je wilt 20. Dan moet de verwarming aan."},
-   {ok:"klep",hint:"De kamer moet echt warmer worden: er moet warm water naar de radiator.",why:"TI stuurt de klep stap voor stap open, zodat het niet te warm wordt."},
-   {ok:"wifi",hint:"Je wilt hem ook vanaf je bank of uit de trein bedienen.",why:"Via wifi naar internet. Ook hier geldt: goed beveiligen, anders zet een ander jouw verwarming hoog."},
-   {ok:"app",hint:"Je wilt de temperatuur op je telefoon zien en instellen.",why:"In de app zie je de temperatuur en zet je hem hoger of lager."}]},
  {id:"beregening",naam:"Slimme beregening",doel:"Een systeem op een akker dat planten alleen water geeft als de grond te droog is.",extra:["temp","laptop","motor","wifi","app"],
   slots:[
    {ok:"vocht",hint:"Het gaat erom of de grond droog is, niet of het warm is.",why:"Een sensor in de grond. TI zet zijn signaal om in een percentage vocht."},
@@ -239,27 +233,13 @@ const SYS=[
    {ok:"led",hint:"Fietsers moeten zien dat ze mogen rijden.",why:"TI zet de lampen in de goede volgorde aan: nooit groen voor twee richtingen tegelijk."},
    {ok:"kabel",hint:"Een verkeerslicht moet altijd verbonden zijn. Draadloos kan uitvallen.",why:"Een vaste kabel naar de verkeerscentrale: betrouwbaarder dan draadloos."},
    {ok:"dash",hint:"De verkeerscentrale wil alle kruispunten in de stad zien.",why:"In de centrale zie je hoeveel fietsers er per kruispunt wachten."}]},
- {id:"parkeergarage",naam:"Slimme parkeergarage",doel:"Een garage die per plek ziet of hij vrij is en bij de ingang laat zien hoeveel plekken er nog zijn.",extra:["temp","laptop","motor","wifi","app"],
-  slots:[
-   {ok:"afstand",hint:"Boven elke plek moet iets meten of er een auto onder staat.",why:"Een afstandssensor aan het plafond: is de afstand kort, dan staat er een auto."},
-   {ok:"chip",hint:"Honderden plekken, dus het brein moet klein en goedkoop zijn.",why:"Eén microcontroller per rij plekken. TI zorgt dat ze samen één goed antwoord geven."},
-   {ok:"led",hint:"Een automobilist wil van ver zien welke plek vrij is.",why:"Groen lampje: vrij. Rood: bezet. TI zet ze aan op basis van de metingen."},
-   {ok:"kabel",hint:"In een betonnen garage werkt draadloos slecht.",why:"Een kabel door de hele garage. Betrouwbaar, ook tussen dikke betonnen muren."},
-   {ok:"display",hint:"Bij de ingang moet iedereen het zien, ook zonder app.",why:"Het grote bord bij de ingang toont hoeveel plekken er nog vrij zijn."}]},
  {id:"dijk",naam:"Dijkbewaking",doel:"Een systeem dat het water bij een dijk bewaakt en alarm slaat als het te hoog komt.",extra:["temp","laptop","led","wifi","app"],
   slots:[
    {ok:"peil",hint:"Het gaat om hoe hoog het water staat.",why:"De sensor meet elke minuut de waterstand, tot op een centimeter."},
    {ok:"chip",hint:"Langs een dijk is geen stopcontact. Het brein moet zuinig zijn.",why:"Een zuinige microcontroller op een accu. Hij vergelijkt de waterstand met de veilige grens."},
    {ok:"speaker",hint:"Mensen in de buurt moeten direct gewaarschuwd worden.",why:"Een sirene. TI zorgt dat hij alleen afgaat bij echt gevaar, niet bij een golfje."},
    {ok:"lora",hint:"Het waterschap is kilometers verderop en er is geen wifi.",why:"LoRa stuurt de meting kilometers ver, met heel weinig stroom."},
-   {ok:"dash",hint:"Het waterschap wil alle meetpunten langs de rivier tegelijk zien.",why:"Op het dashboard ziet het waterschap het water stijgen, nog voordat het gevaarlijk wordt."}]},
- {id:"container",naam:"Slimme afvalcontainer",doel:"Een container in de stad die meet hoe vol hij is, zodat de vuilniswagen alleen komt als het nodig is.",extra:["vocht","laptop","speaker","wifi","app"],
-  slots:[
-   {ok:"afstand",hint:"Van bovenaf meten hoe hoog het afval al ligt.",why:"De sensor meet van boven de afstand tot het afval. Hoe korter, hoe voller."},
-   {ok:"chip",hint:"Het brein zit in de container en werkt jaren op een batterij.",why:"Een zuinige microcontroller die maar een paar keer per uur wakker wordt."},
-   {ok:"motor",hint:"Er moet meer afval in passen voordat hij geleegd wordt.",why:"Een motor drukt het afval samen. Zo past er veel meer in."},
-   {ok:"modem",hint:"Containers staan overal in de stad. Wifi is er niet overal.",why:"Via het 4G-netwerk, net als je telefoon: overal in de stad bereik."},
-   {ok:"dash",hint:"De planner wil zien welke containers vol zijn.",why:"Het dashboard plant de slimste route langs alleen de volle containers. Waste Vision, waar een TI-student afstudeerde, werkt hieraan."}]}
+   {ok:"dash",hint:"Het waterschap wil alle meetpunten langs de rivier tegelijk zien.",why:"Op het dashboard ziet het waterschap het water stijgen, nog voordat het gevaarlijk wordt."}]}
 ];
 const ORDER=["camera","afstand","hart","temp","vocht","peil","chip","laptop","speaker","motor","tril","led","klep","pomp","wifi","bt","lora","kabel","modem","app","dash","display"];
 const CAT={camera:0,afstand:0,hart:0,temp:0,vocht:0,peil:0,chip:1,laptop:1,speaker:2,motor:2,tril:2,led:2,klep:2,pomp:2,wifi:3,bt:3,lora:3,kabel:3,modem:3,app:4,dash:4,display:4};
@@ -267,23 +247,17 @@ const NIET={
  deurbel:{temp:"Een temperatuursensor meet hoe warm het is. Daaraan zie je niet wie er voor de deur staat.",afstand:"Een afstandssensor merkt wel dát er iemand staat, maar niet wíé. Daarvoor heb je beeld nodig.",motor:"Een deurbel hoeft niets te bewegen. Binnen moet je vooral horen dat er gebeld wordt.",bt:"Bluetooth reikt maar een paar meter. Ben je niet thuis, dan krijg je niets binnen.",dash:"Een dashboard is voor grafieken op een computer. Wie er aanbelt wil je meteen op je telefoon zien, waar je ook bent."},
  robotauto:{camera:"Een camera kan ook, maar het beeld is veel rekenwerk voor een kleine chip. Voor 'hoe ver is de muur?' is een afstandssensor simpel en snel.",laptop:"Een laptop is te zwaar voor een kleine robotauto en zijn batterij is zo leeg.",speaker:"Een luidspreker maakt geluid, maar daarmee komt de auto niet vooruit.",bt:"Bluetooth reikt maar een paar meter. Langs een lange baan verlies je de verbinding.",app:"Op een telefoonschermpje zie je weinig. Om de auto te verbeteren wil het team grote grafieken op een computer."},
  hartmonitor:{temp:"De temperatuur zegt niets over een onregelmatige hartslag.",laptop:"Een laptop past niet op een pleister.",speaker:"Een piep hoort de hele kamer. Een trilling merkt alleen de drager.",wifi:"Wifi kost veel stroom. De batterij zou na een dag leeg zijn in plaats van na weken.",dash:"De drager loopt rond en heeft geen computer bij zich. Zijn telefoon wel."},
- thermostaat:{vocht:"Een vochtsensor meet hoe vochtig de lucht is, niet hoe warm.",laptop:"Een laptop die dag en nacht aan de muur hangt is duur en onhandig. Een chipje van een paar euro kan dit ook.",motor:"Motoren laten iets rijden of draaien. De radiator heeft warm water nodig: daar is een klep voor.",lora:"LoRa is voor kilometers ver. Thuis heb je al wifi en daarmee kom je via internet ook bij je telefoon.",dash:"Op de bank pak je even je telefoon. Je start daarvoor geen computer op."},
  beregening:{temp:"Ook als het warm is kan de grond nog nat zijn. Je meet wat de plant echt nodig heeft.",laptop:"Op een akker is geen stroom voor een laptop en in de regen gaat hij kapot.",motor:"Motoren laten iets rijden. Water verplaats je met een pomp.",wifi:"Wifi reikt een paar tientallen meters. De boerderij is een kilometer verderop.",app:"Een app kan ook, maar voor tientallen akkers tegelijk is een groot overzicht op een computer handiger."},
  verkeerslicht:{afstand:"Een afstandssensor ziet maar één punt. Om fietsers te tellen heb je beeld nodig.",laptop:"Een laptop in een kast langs de weg loopt vast of wordt te warm. Een microcontroller werkt jarenlang door.",speaker:"Een tikkend geluid helpt blinde voetgangers wel, maar iedereen moet vooral zien dat het groen is.",wifi:"Wifi kan wegvallen. Een verkeerslicht moet altijd verbonden blijven.",app:"De verkeerscentrale bekijkt de hele stad op grote schermen, niet op een telefoon."},
- parkeergarage:{temp:"De temperatuur verandert nauwelijks als er een auto staat.",laptop:"Een laptop voor elke rij plekken is veel te duur.",motor:"Er hoeft niets te bewegen. De automobilist moet iets kunnen zien.",wifi:"Tussen dikke betonnen muren komt wifi slecht door.",app:"Niet iedereen heeft de app. Een groot bord bij de ingang ziet iedereen."},
- dijk:{temp:"Warm of koud water maakt niet uit. Het gaat om hoe hoog het staat.",laptop:"Langs een dijk is geen stopcontact en een laptop kan niet tegen regen en wind.",led:"Een lampje zie je overdag en van ver slecht. Een sirene hoort iedereen.",wifi:"Langs een dijk is geen wifi en het waterschap zit kilometers verderop.",app:"Het waterschap wil alle meetpunten tegelijk zien op een groot scherm, niet op één telefoon."},
- container:{vocht:"Vocht zegt niet hoe vol de container is.",laptop:"Een laptop houdt het in een vuilcontainer geen dag uit.",speaker:"Geluid maakt geen ruimte. Het afval moet samengedrukt worden.",wifi:"Niet overal in de stad is wifi. Het 4G-netwerk wel.",app:"De planner maakt routes voor de hele stad. Dat doet hij op kantoor op een groot scherm."}
+ dijk:{temp:"Warm of koud water maakt niet uit. Het gaat om hoe hoog het staat.",laptop:"Langs een dijk is geen stopcontact en een laptop kan niet tegen regen en wind.",led:"Een lampje zie je overdag en van ver slecht. Een sirene hoort iedereen.",wifi:"Langs een dijk is geen wifi en het waterschap zit kilometers verderop.",app:"Het waterschap wil alle meetpunten tegelijk zien op een groot scherm, niet op één telefoon."}
 };
 const PUZZEL={
  deurbel:["Het beeld moet binnen een seconde op je telefoon staan, ook via een traag thuisnetwerk.","Een kat of een voorbijganger is geen bezoeker. Hoe leer je de deurbel het verschil?","Niemand anders mag meekijken. Hoe beveilig je het beeld?"],
  robotauto:["Een zwarte muur kaatst het signaal anders terug dan een witte. Hoe voorkom je dat de auto toch botst?","De ene motor draait net iets sneller dan de andere. Hoe rijdt de auto dan toch rechtdoor?","Hoe hard kun je rijden en toch nog op tijd remmen?"],
  hartmonitor:["Lopen en sporten verstoren het signaal. Hoe zie je dan nog een echte hartslag?","Wekenlang werken op een batterijtje zo groot als een knoop.","Te vaak waarschuwen en de drager negeert het. Te weinig en je mist iets. Waar leg je de grens?"],
- thermostaat:["Zet je de klep te ver open, dan schiet de temperatuur door. Hoe kom je precies op 20 graden uit?","Leren wanneer jij thuiskomt, zodat het huis dan al warm is.","Wifi valt even weg. Het huis mag dan niet koud worden. Wat doet de chip zelf?"],
  beregening:["Jarenlang werken op een zonnepaneeltje, ook in de donkere winter.","Een LoRa-bericht is heel klein. Hoe pas je alles wat de boer wil weten in een paar bytes?","Morgen gaat het regenen. Geef je vandaag dan nog water?"],
  verkeerslicht:["Fietsers tellen in regen, mist en het donker.","Nooit twee richtingen tegelijk groen. Hoe toon je aan dat je code dat écht nooit doet?","Wat doet het licht als de camera kapotgaat of de stroom even wegvalt?"],
- parkeergarage:["Een busje is hoger dan een auto en een motor is kleiner. Meet de sensor dan nog goed?","Honderden sensoren op één kabel. Hoe voorkom je dat ze door elkaar praten?","Het bord moet kloppen, ook als er twee auto's tegelijk in- en uitrijden."],
- dijk:["Golven en wind laten het water op en neer gaan. Hoe zie je of het écht stijgt?","De sirene mag geen vals alarm geven, maar ook nooit een echt alarm missen.","Wat als de accu bijna leeg is of de zender uitvalt? Ook dat moet het waterschap weten."],
- container:["Een losse zak bovenop of een vogel op de sensor: dat is nog geen volle container.","Jarenlang op één batterij, terwijl hij ook moet meten, persen en zenden.","Duizenden containers die tegelijk een bericht sturen. Hoe houd je dat netwerk rustig?"]
+ dijk:["Golven en wind laten het water op en neer gaan. Hoe zie je of het écht stijgt?","De sirene mag geen vals alarm geven, maar ook nooit een echt alarm missen.","Wat als de accu bijna leeg is of de zender uitvalt? Ook dat moet het waterschap weten."]
 };
 
 /* ---------- eindstand, badge en kioskmodus ---------- */
@@ -298,7 +272,7 @@ const vandaag=()=>{const d=new Date();return d.getFullYear()+String(d.getMonth()
 const OPENDAG='20261107';
 const MAAND=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
 const datumTekst=d=>(+d.slice(6,8))+' '+MAAND[+d.slice(4,6)-1]+' '+d.slice(0,4);
-const BADGE_SYS=[['camera','Deurbel'],['motor','Robotauto'],['hart','Hartmonitor'],['temp','Thermostaat'],['pomp','Beregening'],['led','Verkeerslicht'],['display','Parkeergarage'],['peil','Dijkbewaking'],['modem','Container']];
+const BADGE_SYS=[['camera','Deurbel'],['motor','Robotauto'],['hart','Hartmonitor'],['pomp','Beregening'],['led','Verkeerslicht'],['peil','Dijkbewaking']];
 
 function iconImg(k){return new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);
   im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" color="#15201A" style="color:#15201A">${ICON[k]}</svg>`);});}
@@ -317,18 +291,18 @@ async function tekenBadge(cv,b){
   g.fillStyle='#15201A'; g.fillText('Systeembouwer',W/2,280);
   const naam=(b.naam||'').trim();
   if(naam){ g.font=body(54); let fs=54; while(g.measureText(naam).width>W-160&&fs>28){fs-=2; g.font=body(fs);} g.fillText(naam,W/2,370); }
-  g.font=body(34,400); g.fillStyle='#33403A'; g.fillText(naam?'bouwde alle negen slimme systemen':'alle negen slimme systemen gebouwd',W/2,naam?428:390);
-  const tw2=280,th=200,gap=30,x0=(W-3*tw2-2*gap)/2,y0=476;
+  g.font=body(34,400); g.fillStyle='#33403A'; g.fillText(naam?'bouwde alle zes slimme systemen':'alle zes slimme systemen gebouwd',W/2,naam?428:390);
+  const tw2=290,th=250,gap=34,x0=(W-3*tw2-2*gap)/2,y0=490;
   BADGE_SYS.forEach(([k,n],i)=>{const x=x0+(i%3)*(tw2+gap), y=y0+Math.floor(i/3)*(th+gap);
-    g.save(); g.translate(x+tw2/2,y+th/2); g.rotate([-0.02,0.015,-0.01,0.02,-0.015,0.01,-0.02,0.012,-0.008][i]);
+    g.save(); g.translate(x+tw2/2,y+th/2); g.rotate([-0.02,0.015,-0.01,0.02,-0.015,0.01][i]);
     g.fillStyle='#FFFFFF'; g.strokeStyle='#12804A'; g.lineWidth=5; g.beginPath(); g.roundRect?g.roundRect(-tw2/2,-th/2,tw2,th,18):g.rect(-tw2/2,-th/2,tw2,th); g.fill(); g.stroke();
-    if(icons[i]) g.drawImage(icons[i],-44,-th/2+22,88,88);
-    g.fillStyle='#15201A'; g.font=hand(42); g.fillText(n,0,th/2-26);
+    if(icons[i]) g.drawImage(icons[i],-56,-th/2+30,112,112);
+    g.fillStyle='#15201A'; g.font=hand(42); g.fillText(n,0,th/2-30);
     g.fillStyle='#12804A'; g.beginPath(); g.arc(tw2/2-30,-th/2+30,20,0,7); g.fill();
     g.strokeStyle='#FFFFFF'; g.lineWidth=5; g.lineCap='round'; g.lineJoin='round'; g.beginPath(); g.moveTo(tw2/2-40,-th/2+30); g.lineTo(tw2/2-32,-th/2+38); g.lineTo(tw2/2-19,-th/2+22); g.stroke();
     g.restore();});
-  g.fillStyle='#15201A'; g.font=body(42); g.fillText(`45 onderdelen goed   ·   ${b.m} ${b.m===1?'misser':'missers'}`,W/2,1210);
-  g.fillStyle='#33403A'; g.font=hand(40); g.fillText('opendag '+datumTekst(b.d)+' · TI test tot het werkt',W/2,1272);
+  g.fillStyle='#15201A'; g.font=body(42); g.fillText(`30 onderdelen goed   ·   ${b.m} ${b.m===1?'misser':'missers'}`,W/2,1170);
+  g.fillStyle='#33403A'; g.font=hand(40); g.fillText('opendag '+datumTekst(b.d)+' · TI test tot het werkt',W/2,1240);
 }
 function badgeBox(el,b){
   el.innerHTML=`<div class="badgebox"><canvas id="badgecv" role="img" aria-label="Badge Systeembouwer, opendag ${datumTekst(b.d)}, ${b.m} ${b.m===1?'misser':'missers'}"></canvas>
@@ -351,9 +325,9 @@ function finaleHTML(){
   if(KIOSK&&url){ const q=qrcode(0,'M'); q.addData(url); q.make();
     badge=`<div class="qrrow"><div class="qr">${q.createSvgTag({cellSize:4,margin:2,scalable:true})}</div><div style="flex:1;min-width:200px"><h3>Neem je badge mee</h3><p>Scan de code met je telefoon. Daar zet je je naam erop en bewaar je hem als afbeelding.</p></div></div>`; }
   else if(!KIOSK){ badge='<div id="badgeslot2"></div>'; }
-  return {b,html:`<div class="finale" id="finale"><div class="kick">eindstand</div><h2>Alle negen systemen <span class="hl">werken!</span></h2>
-   <p>Je deed negen keer wat een TI'er elke dag doet: een probleem opdelen in waarnemen, denken, doen, doorsturen en laten zien. En je bleef proberen tot het werkte.</p>
-   <div class="stats"><div><b>45</b><span>onderdelen goed</span></div><div><b>${missers}</b><span>${missers===1?'misser':'missers'}</span></div></div>
+  return {b,html:`<div class="finale" id="finale"><div class="kick">eindstand</div><h2>Alle zes systemen <span class="hl">werken!</span></h2>
+   <p>Je deed zes keer wat een TI'er elke dag doet: een probleem opdelen in waarnemen, denken, doen, doorsturen en laten zien. En je bleef proberen tot het werkte.</p>
+   <div class="stats"><div><b>30</b><span>onderdelen goed</span></div><div><b>${missers}</b><span>${missers===1?'misser':'missers'}</span></div></div>
    <div class="small">Missers horen erbij. Een TI'er test ook net zo lang tot het werkt.</div>
    ${badge}
    <p><b>Vond je dit leuk?</b> Dan past TI misschien bij je. Kom een dag meelopen: dan bouw je het echt, met studenten van nu.${KIOSK?' Vraag een student hoe je je aanmeldt.':` <a href="${MEELOOP}" target="_blank" rel="noopener">Meer over TI en de meeloopdag</a>`}</p>
@@ -364,6 +338,9 @@ let idleTo=0;
 function opnieuw(){ location.hash=''; location.reload(); }
 function wekker(){ clearTimeout(idleTo); if(KIOSK&&(tStart||alleKlaar())) idleTo=setTimeout(opnieuw,120000); }
 if(KIOSK){ ['pointerdown','keydown'].forEach(e=>addEventListener(e,wekker,{passive:true})); addEventListener('contextmenu',e=>e.preventDefault()); }
+
+/* taalwissel houdt kiosk- en badge-instellingen vast */
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
 
 const plain=x=>x.replace(/\u00ad/g,'');
 function nietTekst(k,i){
@@ -381,8 +358,13 @@ const svg=(k,s=34)=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hi
 
 function render(){
   const sys=SYS[cur], st=state[cur];
-  $('tabs').innerHTML=SYS.map((s,i)=>`<button class="tab" data-i="${i}" aria-pressed="${i===cur}">${s.naam}${state[i].every(Boolean)?' <span class="done">✓</span>':''}</button>`).join('');
+  const tb=$('tabs'), oud=tb.scrollLeft;
+  tb.innerHTML=SYS.map((s,i)=>`<button class="tab" data-i="${i}" aria-pressed="${i===cur}">${s.naam}${state[i].every(Boolean)?' <span class="done">✓</span>':''}</button>`).join('');
   $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;picked=null;lastWhy='';$('hint').textContent='';wisNiet();render();});
+  tb.scrollLeft=oud;
+  /* actieve opdracht in beeld schuiven (alleen horizontaal, de pagina zelf blijft staan) */
+  const act=tb.querySelector('[aria-pressed="true"]');
+  if(act&&tb.scrollWidth>tb.clientWidth){ const doel=act.offsetLeft-(tb.clientWidth-act.offsetWidth)/2; tb.scrollTo({left:Math.max(0,doel),behavior:REDUCED?'auto':'smooth'}); }
   $('goal').textContent=sys.doel;
   $('chain').innerHTML=sys.slots.map((sl,i)=>{
     const f=st[i];
@@ -485,22 +467,16 @@ const ROL={
  deurbel:"Zonder software is dit een kastje met een camera en een knop. Pas de code maakt er een deurbel van die snapt dat er iemand staat en jou meteen een beeld stuurt.",
  robotauto:"De motoren en de sensor doen niets uit zichzelf. Jouw code beslist tientallen keren per seconde: doorrijden, remmen of sturen.",
  hartmonitor:"Hier mag niets misgaan. De software moet een echte hartritmestoornis herkennen, weken op één batterij werken en alleen waarschuwen als het nodig is.",
- thermostaat:"Een sensor en een klep zijn simpel. De slimheid zit in de code: precies op tijd warm, niet te heet en bedienbaar vanaf je telefoon.",
  beregening:"Midden op een akker, zonder stopcontact of wifi. De software moet zuinig zijn, betrouwbaar meten en kilometers ver kunnen zenden.",
  verkeerslicht:"Een fout kan hier een ongeluk veroorzaken. De software moet altijd veilig schakelen en goed getest zijn.",
- parkeergarage:"Honderden sensoren en lampjes moeten samen één juist getal opleveren. Dat samenwerken regel je in software.",
- dijk:"Een vals alarm is lastig, een gemist alarm is gevaarlijk. De software moet echt gevaar onderscheiden van een golfje.",
- container:"Duizenden containers in een stad, die jarenlang op een batterij werken. De software bepaalt wanneer ze meten, persen en melden."
+ dijk:"Een vals alarm is lastig, een gemist alarm is gevaarlijk. De software moet echt gevaar onderscheiden van een golfje."
 };
 const CAP={
  deurbel:["de camera ziet dat er iemand voor de deur staat","de microcontroller herkent: er wordt aangebeld","de luidspreker laat binnen de bel horen","het beeld gaat via wifi naar internet","op je telefoon zie je wie er staat"],
  robotauto:["de afstandssensor meet hoe ver de muur is","de microcontroller besluit: remmen en draaien","de motoren sturen de auto de bocht om","de metingen gaan via wifi naar het team","op het dashboard zie je de afstand per seconde"],
  hartmonitor:["de sensor meet elke hartslag","de microcontroller ziet een onregelmatige slag","het trilmotortje waarschuwt de drager","Bluetooth stuurt de meting zuinig door","de app toont de hartslag en de waarschuwing"],
- thermostaat:["de sensor meet 17 graden: te koud","de microcontroller besluit: verwarming aan","de klep gaat open, de radiator wordt warm","wifi stuurt de temperatuur naar internet","de app laat zien: bijna 20 graden"],
  beregening:["de sensor meet: de grond is te droog","de microcontroller besluit: water geven","het pompje geeft de plant water","LoRa stuurt de meting kilometers ver","de boer ziet op het dashboard hoe nat elke akker is"],
- parkeergarage:["de sensoren zien welke plekken bezet zijn","de microcontroller telt de vrije plekken","de lampjes boven de plekken worden rood of groen","de kabel stuurt de telling naar de ingang","het bord bij de ingang toont: nog zoveel vrij"],
  dijk:["de sensor meet: het water stijgt","de microcontroller ziet: boven de veilige grens","de sirene waarschuwt de buurt","LoRa stuurt de meting naar het waterschap","het waterschap ziet het water stijgen op het dashboard"],
- container:["de sensor meet hoe vol de container is","de microcontroller besluit: samendrukken","de motor drukt het afval samen","het 4G-modem meldt: bijna vol","de planner ziet welke containers geleegd moeten worden"],
  verkeerslicht:["de camera telt de wachtende fietsers","de microcontroller besluit: eerder groen","de lampen springen op groen","de kabel stuurt het naar de centrale","de centrale ziet hoeveel fietsers er per kruispunt waren"]
 };
 function ln(g,pts,c=INK,w=3,dash){g.beginPath();g.setLineDash(dash||[]);g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';g.lineJoin='round';pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();g.setLineDash([]);}
@@ -566,24 +542,6 @@ const SIM={
   g.stroke();
   return step;
  },
- thermostaat(g,W,H,t){
-  const gy=H-30;
-  ln(g,[[20,gy],[W*0.55,gy]],INK,3); ln(g,[[20,gy],[20,70],[W*0.3,24],[W*0.55,70],[W*0.55,gy]],INK,3);
-  const temp=t<2.2?17:Math.min(20.5,17+(t-3.2)*1.6); const tt=Math.max(17,temp);
-  const tx=60, ty=90; box(g,tx,ty,16,gy-ty-40,INK,'#FFFFFF',2.5);
-  const lvl=(tt-15)/7*(gy-ty-50); g.fillStyle=RED; g.fillRect(tx+4,gy-44-lvl,8,lvl);
-  g.beginPath();g.arc(tx+8,gy-30,12,0,7);g.fillStyle=RED;g.fill();
-  txt(g,tt.toFixed(1).replace('.',',')+'°',tx+8,ty-10,tt<19?PEN:RED,22);
-  const rx=W*0.3, ry=gy-70; for(let i=0;i<5;i++) box(g,rx+i*16,ry,12,60,INK,t>3.2?'#FCE5C4':'#FFFFFF',2.5);
-  if(t>3.2) for(let i=0;i<3;i++){const ph=(t*1.5+i/3)%1; ln(g,[[rx+14+i*24,ry-6-ph*30],[rx+20+i*24,ry-14-ph*30],[rx+14+i*24,ry-22-ph*30]],ORA,2.5);}
-  chip(g,W*0.2,110,34,t>2.2);
-  let step=-1; if(t>0.8)step=0; if(t>2.2)step=1; if(t>3.2)step=2; if(t>4.4)step=3; if(t>5.2)step=4;
-  const phx=W-90, phy=gy-150;
-  if(t>4.4){const p=clamp((t-4.4)/0.8,0,1); for(let i=0;i<3;i++){const xx=W*0.55+(phx-W*0.55)*clamp(p-i*0.15,0,1); arcs(g,xx,gy-120,1,8,0,-2.4,-0.7,PEN,0.9);}}
-  const ox=phone(g,phx,phy,60,110);
-  if(t>5.2){box(g,ox+8,phy+10,44,70,PEN,'#EEF3FB',2); txt(g,tt.toFixed(1).replace('.',',')+'°',ox+30,phy+50,INK,22);}
-  return step;
- },
  beregening(g,W,H,t){
   const gy=H-50;
   g.fillStyle='#E9DCC4'; g.fillRect(10,gy,W*0.6,40); ln(g,[[10,gy],[W*0.6+10,gy]],INK,3);
@@ -626,27 +584,6 @@ const SIM={
   if(t>5.4){txt(g,'kruispunt 12',cx+50,cy+30,INK,18); txt(g,'6 fietsers',cx+50,cy+58,OK,22);}
   return step;
  },
- parkeergarage(g,W,H,t){
-  const n=6, sw=Math.min(78,(W*0.62-30)/n), top=40, sh=H-110;
-  box(g,14,top-20,n*sw+20,sh+40,INK,'#E6E8EA',3);
-  const occ=[1,0,1,1,0,1]; const leave=t>2.6?1:0, arrive=t>4.0?4:-1;
-  let free=0;
-  for(let i=0;i<n;i++){const x=24+i*sw; ln(g,[[x,top],[x,top+sh]],'#FFFFFF',3);
-    let o=occ[i]; if(i===leave&&t>2.6) o=0; if(i===arrive) o=1;
-    if(o){const cy=i===leave? top+20+Math.max(0,(t-2.0))*60 : (i===arrive? top+sh-Math.min(sh-30,(t-4.0)*160)-50:top+30); if(cy<top+sh-10){box(g,x+10,cy,sw-20,50,INK,'#DCE6FB',2.5);}} 
-    if(!o||(i===leave&&t>2.9)) free++;
-    const on=t>1.6; g.beginPath();g.arc(x+sw/2,top-6,7,0,7);g.fillStyle=on?((o&&!(i===leave&&t>2.9))?RED:OK):'#9AA6B2';g.fill();
-    if(t>0.6) ln(g,[[x+sw/2,top+2],[x+sw/2,top+26]],PEN,2,[3,5]);
-  }
-  ln(g,[[24+n*sw,top+sh+12],[24+n*sw,top+sh+12]],INK,1);
-  const cx=24+n*sw+16; chip(g,cx+12,top+20,30,t>1.6);
-  let step=-1; if(t>0.6)step=0; if(t>1.6)step=1; if(t>2.6)step=2; if(t>4.6)step=3; if(t>5.4)step=4;
-  const dx=W-170, dy=H-150;
-  ln(g,[[cx+27,top+60],[cx+27,H-20],[dx+70,H-20],[dx+70,dy+90]],t>4.6?OK:'#9AA6B2',3,[8,6]);
-  box(g,dx,dy,140,90,INK,'#15201A',3); txt(g,'P vrij',dx+70,dy+32,'#FFFFFF',22);
-  txt(g,t>5.4?String(free):'--',dx+70,dy+74,'#3BD17A',40);
-  return step;
- },
  dijk(g,W,H,t){
   const base=H-30, crest=60, dx=W*0.32;
   g.fillStyle='#D5F0DF'; g.beginPath(); g.moveTo(dx-120,base); g.lineTo(dx-40,crest); g.lineTo(dx+40,crest); g.lineTo(dx+130,base); g.closePath(); g.fill(); ln(g,[[dx-120,base],[dx-40,crest],[dx+40,crest],[dx+130,base]],OK,3);
@@ -662,27 +599,6 @@ const SIM={
   const wx=W-130, wy=40; box(g,wx,wy+30,100,56,INK,'#FFFFFF',3); ln(g,[[wx,wy+30],[wx+50,wy],[wx+100,wy+30]],INK,3); txt(g,'waterschap',wx+50,wy+104,INK,18);
   if(t>4.4){const p=clamp((t-4.4)/1.0,0,1); for(let i=0;i<4;i++){const xx=px+120+(wx-20-px-120)*clamp(p-i*0.12,0,1); arcs(g,xx,wy+70,1,10,0,-2.4,-0.7,PEN,0.9);}}
   if(t>5.4){const bx=wx-30, by=wy+120, bw=150, bh=70; box(g,bx,by,bw,bh,INK,'#FFFFFF',2.5); ln(g,[[bx+8,by+20],[bx+bw-8,by+20]],RED,2,[5,4]); g.beginPath();g.strokeStyle=PEN;g.lineWidth=2.5; for(let i=0;i<=20;i++){const xx=bx+8+(bw-16)*i/20, yy=by+bh-8-(bh-24)*Math.min(1,(i/20)*1.15); i?g.lineTo(xx,yy):g.moveTo(xx,yy);} g.stroke();}
-  return step;
- },
- container(g,W,H,t){
-  const cx=40, cy=50, cw=170, ch=H-90;
-  box(g,cx,cy,cw,ch,INK,'#FFFFFF',3.5); ln(g,[[cx-8,cy],[cx+cw+8,cy]],INK,6);
-  let fill=Math.min(0.85,0.25+t*0.2); if(t>3.2) fill=Math.max(0.45,0.85-(t-3.2)*0.5);
-  const fy=cy+ch-ch*fill;
-  for(let i=0;i<9;i++){const bx=cx+12+(i%3)*50, by=fy+8+Math.floor(i/3)*30; if(by+22<cy+ch-4) box(g,bx,by,40,22,INK,['#FCE5C4','#D5F0DF','#DCE6FB'][i%3],2);}
-  g.fillStyle='rgba(21,32,26,.08)'; g.fillRect(cx+3,fy,cw-6,cy+ch-fy-3);
-  const plate=t>3.2&&t<4.4? cy+10+(fy-cy-10)*Math.sin((t-3.2)/1.2*Math.PI):cy+10;
-  box(g,cx+6,plate,cw-12,10,ORA,'#FCE5C4',2.5);
-  box(g,cx+cw/2-12,cy-30,24,18,PEN,'#FFFFFF',2.5);
-  if(t>0.5) {ln(g,[[cx+cw/2,cy-12],[cx+cw/2,fy]],PEN,2,[4,6]); txt(g,Math.round(fill*100)+'% vol',cx+cw+60,cy+130,fill>0.7?RED:INK,22);}
-  chip(g,cx+cw+30,cy+70,32,t>2.2);
-  let step=-1; if(t>0.5)step=0; if(t>2.2)step=1; if(t>3.2)step=2; if(t>4.4)step=3; if(t>5.4)step=4;
-  const mx=W-200, my=30, mw=180, mh=H-60;
-  box(g,mx,my,mw,mh,INK,'#FFFFFF',3); txt(g,'planner',mx+mw/2,my+mh+24,INK,18);
-  const pts=[[0.2,0.2],[0.7,0.25],[0.4,0.55],[0.8,0.7],[0.25,0.82]];
-  pts.forEach((p,i)=>{g.beginPath();g.arc(mx+p[0]*mw,my+p[1]*mh,8,0,7);g.fillStyle=(i===2&&t>5.4)||(i===0||i===3)?RED:OK;g.fill();});
-  if(t>4.4){const p=clamp((t-4.4)/1,0,1); for(let i=0;i<3;i++){const xx=cx+cw+80+(mx-cx-cw-100)*clamp(p-i*0.15,0,1); arcs(g,xx,my+60,1,8,0,-2.4,-0.7,PEN,0.9);} }
-  if(t>5.4){ln(g,[[mx+0.2*mw,my+0.2*mh],[mx+0.4*mw,my+0.55*mh],[mx+0.8*mw,my+0.7*mh]],ORA,3,[6,4]);}
   return step;
  },
  hartmonitor(g,W,H,t){

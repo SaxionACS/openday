@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Build a system</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+</head>
+<body>
+<style>
+/* Layout: schriftblad. Boven een keten van 5 vakjes (waarnemen → denken → doen → verbinden → tonen), daaronder de onderdelenbak. Bewust één papieren look. */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A; --pen:#24408E; --red:#D23C3C;
+  --ok:#12804A; --okbg:#D5F0DF; --note:#FFF6B8; --card:#FFFFFF; --mark:rgba(255,214,0,.6); --tape:rgba(233,215,150,.85);
+  --hand:'Caveat','Segoe Print',cursive; --body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  color-scheme: light;
+}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(46px,10vw,72px);line-height:.92;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(30px,7vw,40px);line-height:1}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;position:relative}
+.tab{font:inherit;font-family:var(--hand);font-weight:700;font-size:26px;padding:6px 16px;min-height:46px;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:8px 18px 8px 14px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:#fff}
+.tab .done{color:var(--ok)}
+.tab[aria-pressed="true"] .done{color:#9BE3B9}
+.chain{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;position:relative}
+.slot{font:inherit;color:var(--ink);text-align:left;min-height:150px;background:rgba(255,255,255,.7);border:2.5px dashed var(--ink2);border-radius:10px 20px 12px 18px/18px 12px 20px 10px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;position:relative}
+.slot.armed{border-color:var(--pen);background:#EEF3FB}
+.slot.over{border-color:var(--pen);border-style:solid}
+.slot.filled{border-style:solid;border-color:var(--ok);background:var(--okbg);cursor:default}
+.slot.wrong{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.slot .step{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1;color:var(--pen)}
+.slot .ask{font-size:15px;color:var(--ink2)}
+.slot .got{font-weight:700;font-size:15.5px;line-height:1.2;display:flex;gap:6px;align-items:center;min-width:0}
+.slot .got span{min-width:0;overflow-wrap:anywhere;hyphens:manual}
+.slot .why{font-size:14.5px;line-height:1.35}
+.slot.pulse{box-shadow:0 0 0 4px var(--mark)}
+.arrow{display:none}
+.hint{min-height:28px;font-family:var(--hand);font-weight:700;font-size:26px;line-height:1.1;color:var(--red)}
+.hint.good{color:var(--ok)}
+.bin{display:flex;flex-direction:column;gap:10px}
+.parts{display:flex;flex-wrap:wrap;gap:12px}
+.part{font:inherit;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px 16px 8px 12px/12px 8px 16px 6px;padding:8px 14px;min-height:48px;display:flex;gap:8px;align-items:center;cursor:grab;box-shadow:3px 3px 0 rgba(21,32,26,.13);touch-action:manipulation}
+.part:nth-child(odd){transform:rotate(-1deg)}
+.part:nth-child(even){transform:rotate(1deg)}
+.part[aria-pressed="true"]{background:var(--note);border-color:var(--pen);box-shadow:0 0 0 3px var(--pen)}
+.part[disabled]{opacity:.35;cursor:default;box-shadow:none}
+.part svg,.slot svg{flex-shrink:0}
+button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.win{position:relative;background:var(--note);padding:24px 20px 18px;transform:rotate(-.6deg);box-shadow:4px 5px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:10px}
+.win::before{content:"";position:absolute;top:-11px;left:42%;width:80px;height:22px;background:var(--tape);transform:rotate(-3deg)}
+.btn{font:inherit;font-family:var(--hand);font-weight:700;font-size:28px;color:#fff;background:var(--ink);border:none;border-radius:10px 22px 10px 18px;padding:8px 22px;min-height:48px;cursor:pointer;align-self:flex-start}
+.small{font-size:14.5px;color:var(--ink2)}
+.simbox{background:#FFFFFF;border:2.5px solid var(--ink);border-radius:8px 18px 10px 14px/14px 10px 18px 8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.simbox canvas{display:block;max-width:100%}
+.simcap{display:grid;font-family:var(--hand);font-weight:700;font-size:26px;line-height:1.1;color:var(--pen)}
+.simcap span{grid-area:1/1;visibility:hidden}
+.simcap span.on{visibility:visible}
+.tirol{background:#FFFFFF;border:2.5px solid var(--ink);border-radius:10px 20px 8px 16px/16px 8px 20px 10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.tirol h3{margin:0;font-family:var(--hand);font-weight:700;font-size:30px;line-height:1}
+.tirol ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.tirol .punch{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1.1;color:var(--red)}
+@media (max-width:720px){.niet{font-size:14px;padding:6px 10px}.nietbtn{font-size:14px}.puzzels summary{font-size:24px}.puzzels .leuk{font-size:21px}.simcap{font-size:20px}.tirol h3{font-size:26px}.tirol .punch{font-size:24px}}
+.whybox{display:none}
+.nietbtn{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:none;border:none;text-decoration:underline;text-underline-offset:3px;padding:4px 4px;min-height:32px;cursor:pointer;vertical-align:middle}
+.niet{font-size:15.5px;line-height:1.4;background:var(--card);border-left:4px solid var(--red);padding:8px 12px;max-width:70ch}
+.puzzels{background:#FFFFFF;border:2.5px dashed var(--pen);border-radius:16px 8px 20px 10px/10px 20px 8px 16px;padding:10px 16px}
+.puzzels summary{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1.1;color:var(--pen);cursor:pointer;min-height:40px;display:flex;align-items:center;gap:8px;list-style:none}
+.puzzels summary::-webkit-details-marker{display:none}
+.puzzels summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:2.5px solid var(--pen);border-radius:50%;font-family:var(--body);font-size:18px;flex-shrink:0}
+.puzzels[open] summary::before{content:"−"}
+.puzzels ol{margin:8px 0 6px;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.puzzels .leuk{font-family:var(--hand);font-weight:700;font-size:24px;line-height:1.1;color:var(--ok)}
+[hidden]{display:none !important}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:6px 2px;min-height:32px;white-space:nowrap}
+.finale{position:relative;background:var(--card);border:3.5px solid var(--ink);border-radius:12px 26px 10px 22px/22px 10px 26px 12px;padding:22px 20px 20px;box-shadow:5px 6px 0 rgba(21,32,26,.15);display:flex;flex-direction:column;gap:12px;transform:rotate(.4deg)}
+.finale h2{font-size:clamp(36px,8vw,52px)}
+.finale p{margin:0;max-width:62ch}
+.stats{display:flex;flex-wrap:wrap;gap:12px}
+.stats div{background:var(--note);padding:8px 14px 6px;display:flex;flex-direction:column;min-width:96px;transform:rotate(-1deg);box-shadow:2px 3px 0 rgba(21,32,26,.12)}
+.stats div:nth-child(2){transform:rotate(1deg)}
+.stats b{font-family:var(--hand);font-size:40px;line-height:1}
+@media (max-width:720px){.stats{flex-wrap:nowrap;gap:8px}.stats div{min-width:0;flex:1;padding:6px 8px 4px}.stats b{font-size:32px}.stats span{font-size:12.5px}}
+.stats span{font-size:14px;color:var(--ink2)}
+.badgebox{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.badgebox canvas{width:min(100%,360px);height:auto;border:2.5px solid var(--ink);border-radius:8px;box-shadow:4px 5px 0 rgba(21,32,26,.13);background:#FCF8EC}
+.badgeform{display:flex;flex-direction:column;gap:10px;min-width:220px;flex:1}
+.badgeform label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:15px}
+.badgeform input{font:inherit;font-size:18px;padding:8px 10px;min-height:44px;border:2.5px solid var(--ink);border-radius:6px 12px 8px 10px;background:#fff;color:var(--ink)}
+.qrrow{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.qr{background:#fff;padding:10px;border:2.5px solid var(--ink);border-radius:8px;width:230px;flex-shrink:0;transform:rotate(-1.5deg)}
+.qr svg{display:block;width:100%;height:auto}
+.qrrow h3{margin:0 0 4px;font-family:var(--hand);font-weight:700;font-size:38px;line-height:1}
+#badgeview{max-width:620px}
+.tip-phone{display:none}
+.tip-desk,.tip-phone{color:var(--ink2)}
+.intro-short{display:none}
+/* telefoon: compacte keten bovenaan, onderdelenbak vast onderin beeld */
+@media (max-width:720px){
+  body{padding-block:12px 0}
+  .wrap{gap:12px}
+  .kick{font-size:20px}
+  h1{font-size:44px}
+  h2{font-size:26px;line-height:1.05}
+  .intro-long{display:none}
+  .tip-desk{display:none}
+  .tip-phone{display:inline}
+  .intro-short{display:block;margin:0;font-size:15.5px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-inline:-4px;padding-inline:4px;scrollbar-width:thin}
+  .tab{font-size:22px;white-space:nowrap;flex-shrink:0;min-height:44px;padding:4px 12px}
+  .chain{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .slot{min-height:104px;padding:6px 4px;align-items:center;text-align:center;gap:4px;border-width:2px}
+  .slot .step{display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1;max-width:100%}
+  .slot .step .sn{overflow-wrap:anywhere;hyphens:manual;max-width:100%}
+  .slot .step .n{font-size:24px}
+  .slot .step .sep{display:none}
+  .slot .ask,.slot .why{display:none}
+  .slot .got{flex-direction:column;gap:2px;font-size:11.5px;line-height:1.1}
+  .slot .got svg{width:30px;height:30px}
+  .whybox{display:block;background:var(--card);border:2px solid var(--ok);border-radius:8px 16px 10px 14px/14px 10px 16px 8px;padding:10px 12px;font-size:15px;line-height:1.35;min-height:44px}
+  .whybox.ask{border-color:var(--pen);border-style:dashed}
+  .bin{position:sticky;bottom:0;z-index:5;background:var(--paper);border-top:2.5px solid var(--ink);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:8px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));gap:6px;box-shadow:0 -6px 14px rgba(21,32,26,.08)}
+  .bin .kick{font-size:18px !important}
+  .hint{font-size:21px;min-height:24px}
+  .parts{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding:4px 2px 6px;scroll-snap-type:x proximity}
+  .part{flex-shrink:0;padding:6px 10px;font-size:15px;scroll-snap-align:start}
+  .part svg{width:26px;height:26px}
+  #win{padding-bottom:24px}
+}
+@media (prefers-reduced-motion:reduce){.slot.wrong{animation:none}}
+</style>
+
+<main class="wrap" lang="en">
+  <a href="./samenvatting.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;align-self:flex-start">← back to the overview (in Dutch)</a>
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="kick">Saxion open day · Technische Informatica (TI)</div><a class="taal" href="bouw-een-systeem.html" lang="nl" hreflang="nl">Nederlands</a></div>
+  <h1>Build a <span class="hl">system</span></h1>
+  <p class="intro-short">Every smart device <b>senses</b>, <b>thinks</b>, <b>acts</b>, <b>sends</b> the data on and <b>shows</b> it. Tap a part at the bottom, then the box where it belongs.</p>
+  <p class="intro-long" style="margin:0;max-width:62ch">Every smart device follows the same five steps: it <b>senses</b> something, <b>thinks</b> about it, <b>acts</b>, <b>sends</b> the data on and <b>shows</b> it to a person. Put the right parts in the right place. Drag them, or tap a part first and then a box.</p>
+  <div class="tabs" id="tabs" role="group" aria-label="choose a system"></div>
+  <h2 id="goal"></h2>
+  <div class="chain" id="chain"></div>
+  <div class="whybox" id="whybox" aria-live="polite"></div>
+  <div class="bin" id="bin">
+    <div class="hint" id="hint" aria-live="polite"></div>
+    <div class="niet" id="niet" hidden></div>
+    <div class="kick" style="font-size:22px">the parts box <span class="tip-desk">· drag a part to a box, or tap it</span><span class="tip-phone">· tap a part, then a box</span></div>
+    <div class="parts" id="parts"></div>
+  </div>
+  <div id="win" hidden></div>
+</main>
+<main class="wrap" id="badgeview" lang="en" hidden>
+  <div class="kick">Saxion open day · Technische Informatica (TI)</div>
+  <h1>Your <span class="hl">badge</span></h1>
+  <p style="margin:0">You built all six smart systems in the game <b>Build a system</b>. Add your name and save it.</p>
+  <div id="badgeslot"></div>
+  <p class="small" style="margin:0">Your name is not stored or sent anywhere. It only appears on the image you save yourself.</p>
+</main>
+
+<script>
+/* qrcode-generator 1.4.4, MIT-licentie, Kazuhiko Arase */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,(function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1}))},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(t,r){var e=n("友");if(2!=e.length||38726!=(e[0]<<8|e[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}((function(){return qrcode}));
+</script>
+<script>
+const ICON={
+ camera:'<path d="M8 20h10l4-6h20l4 6h10v30H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="34" r="9" fill="none" stroke="currentColor" stroke-width="4"/>',
+ afstand:'<path d="M10 32h8M24 18c8 8 8 20 0 28M34 12c12 12 12 28 0 40M44 6c16 16 16 36 0 52" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ hart:'<path d="M32 54C14 42 6 32 6 22c0-8 6-14 13-14 6 0 10 4 13 8 3-4 7-8 13-8 7 0 13 6 13 14 0 10-8 20-26 32z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M14 30h10l4-8 6 16 4-8h12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+ temp:'<path d="M26 10a6 6 0 0112 0v28a11 11 0 11-12 0z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v24" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ chip:'<rect x="18" y="18" width="28" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 18V8M32 18V8M40 18V8M24 46v10M32 46v10M40 46v10M18 26H8M18 38H8M46 26h10M46 38h10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ laptop:'<rect x="12" y="12" width="40" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M4 50h56l-4-8H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>',
+ speaker:'<path d="M8 24h10l14-12v40L18 40H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M42 22c5 5 5 15 0 20M50 14c10 10 10 26 0 36" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ motor:'<circle cx="32" cy="32" r="18" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="5" fill="currentColor"/><path d="M32 14v-8M50 32h8M32 50v8M14 32H6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ tril:'<rect x="22" y="10" width="20" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M12 22l-4 4 4 4-4 4 4 4M52 22l4 4-4 4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+ wifi:'<path d="M8 26c14-14 34-14 48 0M16 34c9-9 23-9 32 0M24 42c4-4 12-4 16 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="50" r="4" fill="currentColor"/>',
+ bt:'<path d="M20 20l24 24-12 12V8l12 12-24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+ app:'<rect x="18" y="6" width="28" height="52" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 18h12M26 28h12M26 38h6" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ dash:'<path d="M10 50V14M10 50h46" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M16 42l10-12 8 6 14-18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+ led:'<path d="M22 30a10 10 0 0120 0v10H22z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 40v14M36 40v14M32 8v6M14 16l4 4M50 16l-4 4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ klep:'<path d="M6 32h18M40 32h18" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M24 22l16 20M24 42l16-20" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 22v20M40 22v20M32 32V12M24 12h16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ vocht:'<path d="M32 6C24 18 16 26 16 36a16 16 0 0032 0c0-10-8-18-16-30z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 38a8 8 0 008 8" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ pomp:'<circle cx="26" cy="36" r="14" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 22V10h28M50 10v8M46 22l4 6 4-6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 36h12M26 30v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ lora:'<path d="M32 30v28M24 58h16" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="24" r="4" fill="currentColor"/><path d="M20 12c-6 6-6 18 0 24M44 12c6 6 6 18 0 24M12 4c-11 11-11 29 0 40M52 4c11 11 11 29 0 40" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ display:'<rect x="6" y="12" width="52" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M16 22h14M16 30h22M16 38h10M32 46v10M22 56h20" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ peil:'<path d="M20 6v52M14 14h6M14 24h6M14 34h6M14 44h6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M28 40c4-4 8-4 12 0s8 4 12 0M28 50c4-4 8-4 12 0s8 4 12 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ modem:'<rect x="10" y="28" width="44" height="22" rx="4" fill="none" stroke="currentColor" stroke-width="4"/><path d="M20 28V14M44 28V14M18 39h4M28 39h4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><text x="36" y="45" font-size="12" font-weight="700" fill="currentColor" font-family="sans-serif">4G</text>',
+ kabel:'<rect x="20" y="6" width="24" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 6v-0M28 12v6M32 12v6M36 12v6M32 26v8c0 10-20 6-20 16v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+};
+const PART={
+ camera:"Camera", afstand:"Distance sensor", hart:"Heart rate sensor", temp:"Tempe­rature sensor",
+ chip:"Micro­controller", laptop:"Laptop", speaker:"Loud­speaker", motor:"Two motors", tril:"Vibra­tion motor",
+ led:"Lights", wifi:"Wi-Fi", bt:"Bluetooth", app:"App on your phone", dash:"Dashboard on a computer",
+ klep:"Heating valve", vocht:"Moisture sensor", pomp:"Water pump", lora:"LoRa radio (kilometres)", kabel:"Network cable",
+ display:"Large display", peil:"Water level sensor", modem:"4G modem"
+};
+const STEP=[["sense","What does the system need to measure or see?"],["think","Which brain decides?"],["act","What happens in the real world?"],["send","How does the data get out?"],["show","Where does a person see it?"]];
+const SYS=[
+ {id:"deurbel",naam:"Smart doorbell",extra:["temp","afstand","motor","bt","dash"],doel:"A doorbell that shows you who is at the door.",
+  slots:[
+   {ok:"camera",hint:"The doorbell needs to see who is there.",why:"TI writes the code that shrinks the camera image so it can be sent quickly."},
+   {ok:"chip",hint:"The brain has to be small and frugal: it sits in a little box by the door.",why:"A microcontroller: a computer that costs a few euros. You learn to program it in C in year 1."},
+   {ok:"speaker",hint:"Someone inside needs to hear the bell.",why:"TI makes the chip play a sound at exactly the right moment, without delay."},
+   {ok:"wifi",hint:"The image has to reach your phone, even when you are not at home.",why:"Over Wi-Fi to the internet. TI makes sure this is secure, so not just anyone can watch."},
+   {ok:"app",hint:"You want to see on your phone who is ringing.",why:"The app shows the image. TI connects the device to the app."}]},
+ {id:"robotauto",naam:"Self-driving robot car",extra:["camera","laptop","speaker","bt","app"],doel:"A robot car that drives a course on its own without bumping into anything.",
+  slots:[
+   {ok:"afstand",hint:"The car needs to know how far away the wall is.",why:"TI reads the sensor dozens of times per second and filters out the noise."},
+   {ok:"chip",hint:"A laptop on a small robot car is too heavy and drains the battery.",why:"The microcontroller decides: brake, steer or keep going. First-year students build this in their fourth quarter."},
+   {ok:"motor",hint:"The car has to drive and steer.",why:"TI controls the motors precisely, so the car drives straight and still makes the turn."},
+   {ok:"wifi",hint:"The measurements have to reach a computer next to the track.",why:"Over Wi-Fi the car sends its measurements to the team."},
+   {ok:"dash",hint:"The team wants graphs to improve the car.",why:"The dashboard shows what the car 'saw'. That is how you find out why it crashed after all."}]},
+ {id:"hartmonitor",naam:"Wearable heart monitor",extra:["temp","laptop","speaker","wifi","dash"],doel:"A patch-sized device that measures the heart day and night and warns when something is wrong.",
+  slots:[
+   {ok:"hart",hint:"We want to measure the heart, not the temperature.",why:"TI turns the heart's weak electrical signal into numbers."},
+   {ok:"chip",hint:"It has to be small and run for weeks on a tiny battery.",why:"A low-power microcontroller. TI lets it sleep as much as possible to save energy."},
+   {ok:"tril",hint:"The wearer has to notice, even in a busy room.",why:"A vibration warns without the whole room hearing it."},
+   {ok:"bt",hint:"Wi-Fi uses too much power for such a small device.",why:"Bluetooth is frugal. A TI student really graduated on this, at Diplora."},
+   {ok:"app",hint:"The wearer wants to see their heart rate on their own phone.",why:"The app shows the measurements and can send them on to the doctor."}]},
+ {id:"beregening",naam:"Smart irrigation",doel:"A system in a field that only waters the plants when the soil is too dry.",extra:["temp","laptop","motor","wifi","app"],
+  slots:[
+   {ok:"vocht",hint:"What matters is whether the soil is dry, not whether it is warm.",why:"A sensor in the soil. TI turns its signal into a moisture percentage."},
+   {ok:"chip",hint:"There is no socket for a laptop in the middle of a field.",why:"A low-power microcontroller on a small solar panel. It sleeps almost all the time and only wakes up to measure."},
+   {ok:"pomp",hint:"The plants need water.",why:"The chip runs the pump exactly as long as needed. Not a drop too much."},
+   {ok:"lora",hint:"The farm is a kilometre away. Wi-Fi does not reach that far.",why:"Wi-Fi reaches a few dozen metres. LoRa covers kilometres, on very little power."},
+   {ok:"dash",hint:"The farmer wants to see how wet every field is, all at once.",why:"On the dashboard the farmer sees every field. TI students build sensor networks like this too."}]},
+ {id:"verkeerslicht",naam:"Smart traffic light",doel:"A traffic light that sees how many cyclists are waiting and gives them green sooner.",extra:["afstand","laptop","speaker","wifi","app"],
+  slots:[
+   {ok:"camera",hint:"The light has to see how many cyclists are waiting.",why:"TI counts the cyclists in the camera image, also in the rain and in the dark."},
+   {ok:"chip",hint:"The brain sits in the cabinet by the road and must never stop working.",why:"The microcontroller decides when the light turns green. A mistake here can be dangerous, so testing is crucial."},
+   {ok:"led",hint:"Cyclists need to see that they can go.",why:"TI switches the lights in the right order: never green for two directions at once."},
+   {ok:"kabel",hint:"A traffic light must always stay connected. Wireless can drop out.",why:"A fixed cable to the traffic control centre: more reliable than wireless."},
+   {ok:"dash",hint:"The control centre wants to see every junction in the city.",why:"In the control centre you see how many cyclists are waiting at each junction."}]},
+ {id:"dijk",naam:"Dike monitoring",doel:"A system that watches the water at a dike and raises the alarm when it gets too high.",extra:["temp","laptop","led","wifi","app"],
+  slots:[
+   {ok:"peil",hint:"It is about how high the water is.",why:"The sensor measures the water level every minute, to the centimetre."},
+   {ok:"chip",hint:"There is no power socket along a dike. The brain has to be frugal.",why:"A low-power microcontroller on a battery. It compares the water level with the safe limit."},
+   {ok:"speaker",hint:"People nearby must be warned right away.",why:"A siren. TI makes sure it only goes off for real danger, not for a ripple."},
+   {ok:"lora",hint:"The water board is kilometres away and there is no Wi-Fi.",why:"LoRa sends the measurement kilometres away, on very little power."},
+   {ok:"dash",hint:"The water board wants to see every measuring point along the river at once.",why:"On the dashboard the water board sees the water rise, before it becomes dangerous."}]}
+];
+const ORDER=["camera","afstand","hart","temp","vocht","peil","chip","laptop","speaker","motor","tril","led","klep","pomp","wifi","bt","lora","kabel","modem","app","dash","display"];
+const CAT={camera:0,afstand:0,hart:0,temp:0,vocht:0,peil:0,chip:1,laptop:1,speaker:2,motor:2,tril:2,led:2,klep:2,pomp:2,wifi:3,bt:3,lora:3,kabel:3,modem:3,app:4,dash:4,display:4};
+const NIET={
+ deurbel:{temp:"A temperature sensor measures how warm it is. That does not tell you who is at the door.",afstand:"A distance sensor notices that someone is there, but not who. For that you need an image.",motor:"A doorbell does not need to move anything. Inside, you mainly need to hear that someone rang.",bt:"Bluetooth only reaches a few metres. When you are not at home, nothing comes through.",dash:"A dashboard is for graphs on a computer. You want to see who is ringing right away on your phone, wherever you are."},
+ robotauto:{camera:"A camera could work, but the image is a lot of computing for a small chip. For 'how far is the wall?' a distance sensor is simple and fast.",laptop:"A laptop is too heavy for a small robot car and its battery runs out quickly.",speaker:"A loudspeaker makes sound, but that will not move the car forward.",bt:"Bluetooth only reaches a few metres. Along a long track you lose the connection.",app:"You cannot see much on a phone screen. To improve the car, the team wants big graphs on a computer."},
+ hartmonitor:{temp:"Temperature tells you nothing about an irregular heartbeat.",laptop:"A laptop does not fit on a patch.",speaker:"The whole room hears a beep. Only the wearer feels a vibration.",wifi:"Wi-Fi uses a lot of power. The battery would be empty after a day instead of after weeks.",dash:"The wearer walks around without a computer. They do carry a phone."},
+ beregening:{temp:"Even when it is warm, the soil can still be wet. You measure what the plant really needs.",laptop:"There is no power for a laptop in a field and the rain would break it.",motor:"Motors make things drive or turn. You move water with a pump.",wifi:"Wi-Fi reaches a few dozen metres. The farm is a kilometre away.",app:"An app could work, but for dozens of fields at once a big overview on a computer is handier."},
+ verkeerslicht:{afstand:"A distance sensor only sees one point. To count cyclists you need an image.",laptop:"A laptop in a roadside cabinet freezes or overheats. A microcontroller keeps running for years.",speaker:"A ticking sound does help blind pedestrians, but everyone mainly needs to see that it is green.",wifi:"Wi-Fi can drop out. A traffic light must always stay connected.",app:"The control centre watches the whole city on big screens, not on a phone."},
+ dijk:{temp:"Warm or cold water does not matter. What counts is how high it is.",laptop:"There is no power socket along a dike and a laptop cannot handle rain and wind.",led:"A light is hard to see by day or from far away. Everyone hears a siren.",wifi:"There is no Wi-Fi along a dike and the water board is kilometres away.",app:"The water board wants to see every measuring point at once on a big screen, not on one phone."}
+};
+const PUZZEL={
+ deurbel:["The image has to be on your phone within a second, even over a slow home network.","A cat or a passer-by is not a visitor. How do you teach the doorbell the difference?","Nobody else may watch. How do you secure the image?"],
+ robotauto:["A black wall reflects the signal differently from a white one. How do you stop the car from crashing anyway?","One motor turns slightly faster than the other. How does the car still drive straight?","How fast can you go and still brake in time?"],
+ hartmonitor:["Walking and sport disturb the signal. How do you still see a real heartbeat?","Running for weeks on a battery the size of a button.","Warn too often and the wearer ignores it. Too rarely and you miss something. Where do you draw the line?"],
+ beregening:["Running for years on a small solar panel, even in the dark winter.","A LoRa message is tiny. How do you fit everything the farmer wants to know into a few bytes?","It is going to rain tomorrow. Do you still water today?"],
+ verkeerslicht:["Counting cyclists in rain, fog and darkness.","Never green for two directions at once. How do you prove your code really never does that?","What does the light do if the camera breaks or the power cuts out for a moment?"],
+ dijk:["Waves and wind make the water go up and down. How do you tell if it is really rising?","The siren must never give a false alarm, but must never miss a real one either.","What if the battery is almost empty or the radio fails? The water board needs to know that too."]
+};
+
+/* ---------- eindstand, badge en kioskmodus ---------- */
+const QS=new URLSearchParams(location.search);
+const KIOSK=QS.has('kiosk');
+const BADGE_BASE=QS.get('badge')||(/^https?:$/.test(location.protocol)?location.origin+location.pathname:'');
+const MEELOOP='https://www.saxion.nl/opleidingen/voltijd/bachelor/technische-informatica';
+let tStart=0, tEind=0, missers=0;
+const alleKlaar=()=>state.every(st=>st.every(Boolean));
+const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const vandaag=()=>{const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');};
+const OPENDAG='20261107';
+const MAAND=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const datumTekst=d=>(+d.slice(6,8))+' '+MAAND[+d.slice(4,6)-1]+' '+d.slice(0,4);
+const BADGE_SYS=[['camera','Doorbell'],['motor','Robot car'],['hart','Heart monitor'],['pomp','Irrigation'],['led','Traffic light'],['peil','Dike watch']];
+
+function iconImg(k){return new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);
+  im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" color="#15201A" style="color:#15201A">${ICON[k]}</svg>`);});}
+async function tekenBadge(cv,b){
+  try{await Promise.all([document.fonts.load('700 60px Caveat'),document.fonts.load('700 40px "Atkinson Hyperlegible"'),document.fonts.load('400 30px "Atkinson Hyperlegible"')]);}catch(e){}
+  const icons=await Promise.all(BADGE_SYS.map(([k])=>iconImg(k)));
+  const W=1080,H=1350; cv.width=W; cv.height=H; const g=cv.getContext('2d');
+  const hand=(sz,w=700)=>`${w} ${sz}px Caveat, "Segoe Print", cursive`, body=(sz,w=700)=>`${w} ${sz}px "Atkinson Hyperlegible", "Segoe UI", sans-serif`;
+  g.fillStyle='#FCF8EC'; g.fillRect(0,0,W,H);
+  g.strokeStyle='#E2E9F2'; g.lineWidth=2; for(let x=0;x<W;x+=36){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();} for(let y=0;y<H;y+=36){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.strokeStyle='#15201A'; g.lineWidth=8; g.beginPath(); g.roundRect?g.roundRect(28,28,W-56,H-56,28):g.rect(28,28,W-56,H-56); g.stroke();
+  g.textAlign='center'; g.textBaseline='alphabetic';
+  g.save(); g.translate(W/2,128); g.rotate(-0.025); g.fillStyle='#24408E'; g.font=hand(48); g.fillText('open day Technische Informatica · Saxion',0,0); g.restore();
+  let tf=156; g.font=hand(tf); while(g.measureText('System Builder').width>W-150&&tf>90){tf-=4; g.font=hand(tf);} const tw=g.measureText('System Builder').width;
+  g.fillStyle='rgba(255,214,0,.6)'; g.fillRect(W/2-tw/2-14,232,tw+28,60);
+  g.fillStyle='#15201A'; g.fillText('System Builder',W/2,280);
+  const naam=(b.naam||'').trim();
+  if(naam){ g.font=body(54); let fs=54; while(g.measureText(naam).width>W-160&&fs>28){fs-=2; g.font=body(fs);} g.fillText(naam,W/2,370); }
+  g.font=body(34,400); g.fillStyle='#33403A'; g.fillText(naam?'built all six smart systems':'built all six smart systems',W/2,naam?428:390);
+  const tw2=290,th=250,gap=34,x0=(W-3*tw2-2*gap)/2,y0=490;
+  BADGE_SYS.forEach(([k,n],i)=>{const x=x0+(i%3)*(tw2+gap), y=y0+Math.floor(i/3)*(th+gap);
+    g.save(); g.translate(x+tw2/2,y+th/2); g.rotate([-0.02,0.015,-0.01,0.02,-0.015,0.01][i]);
+    g.fillStyle='#FFFFFF'; g.strokeStyle='#12804A'; g.lineWidth=5; g.beginPath(); g.roundRect?g.roundRect(-tw2/2,-th/2,tw2,th,18):g.rect(-tw2/2,-th/2,tw2,th); g.fill(); g.stroke();
+    if(icons[i]) g.drawImage(icons[i],-56,-th/2+30,112,112);
+    g.fillStyle='#15201A'; g.font=hand(42); g.fillText(n,0,th/2-30);
+    g.fillStyle='#12804A'; g.beginPath(); g.arc(tw2/2-30,-th/2+30,20,0,7); g.fill();
+    g.strokeStyle='#FFFFFF'; g.lineWidth=5; g.lineCap='round'; g.lineJoin='round'; g.beginPath(); g.moveTo(tw2/2-40,-th/2+30); g.lineTo(tw2/2-32,-th/2+38); g.lineTo(tw2/2-19,-th/2+22); g.stroke();
+    g.restore();});
+  g.fillStyle='#15201A'; g.font=body(42); g.fillText(`30 parts right   ·   ${b.m} ${b.m===1?'mistake':'mistakes'}`,W/2,1170);
+  g.fillStyle='#33403A'; g.font=hand(40); g.fillText('open day '+datumTekst(b.d)+' · TI tests until it works',W/2,1240);
+}
+function badgeBox(el,b){
+  el.innerHTML=`<div class="badgebox"><canvas id="badgecv" role="img" aria-label="Badge System Builder, open day ${datumTekst(b.d)}, ${b.m} ${b.m===1?'mistake':'mistakes'}"></canvas>
+   <div class="badgeform"><label for="bnaam">Your name on the badge (optional)<input id="bnaam" maxlength="24" autocomplete="off"></label>
+   <button class="btn" id="bsave">Save your badge</button></div></div>`;
+  const cv=$('badgecv'); let to=0;
+  tekenBadge(cv,b);
+  $('bnaam').oninput=()=>{clearTimeout(to); to=setTimeout(()=>tekenBadge(cv,{...b,naam:$('bnaam').value}),150);};
+  $('bsave').onclick=async()=>{ await tekenBadge(cv,{...b,naam:$('bnaam').value});
+    cv.toBlob(async blob=>{ const f=new File([blob],'badge-system-builder.png',{type:'image/png'});
+      const dl=window.claude&&window.claude.use?await window.claude.use('downloads').catch(()=>null):null;
+      if(dl){ try{ await dl.save({filename:'badge-system-builder.png',data:blob}); }catch(e){} return; }
+      try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:'My System Builder badge'}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },'image/png'); };
+}
+function finaleHTML(){
+  const b={m:missers,d:OPENDAG};
+  const url=BADGE_BASE?BADGE_BASE+'#badge='+b.m:'';
+  let badge='';
+  if(KIOSK&&url){ const q=qrcode(0,'M'); q.addData(url); q.make();
+    badge=`<div class="qrrow"><div class="qr">${q.createSvgTag({cellSize:4,margin:2,scalable:true})}</div><div style="flex:1;min-width:200px"><h3>Take your badge home</h3><p>Scan the code with your phone. There you can add your name and save it as an image.</p></div></div>`; }
+  else if(!KIOSK){ badge='<div id="badgeslot2"></div>'; }
+  return {b,html:`<div class="finale" id="finale"><div class="kick">final score</div><h2>All six systems <span class="hl">work!</span></h2>
+   <p>Six times, you did what a TI engineer does every day: break a problem down into sense, think, act, send and show. And you kept trying until it worked.</p>
+   <div class="stats"><div><b>30</b><span>parts right</span></div><div><b>${missers}</b><span>${missers===1?'mistake':'mistakes'}</span></div></div>
+   <div class="small">Mistakes are part of it. A TI engineer also keeps testing until it works.</div>
+   ${badge}
+   <p><b>Did you enjoy this?</b> Then TI might suit you. Come for a trial day: then you build it for real, with current students.${KIOSK?' Ask a student how to sign up.':` <a href="${MEELOOP}" target="_blank" rel="noopener">More about TI and trial days (in Dutch)</a>`}</p>
+   ${KIOSK?'<button class="btn" id="opnieuw">Done? Hand over to the next player</button>':''}</div>`};
+}
+/* kiosk: na 2 minuten niets doen begint het spel opnieuw voor de volgende bezoeker */
+let idleTo=0;
+function opnieuw(){ location.hash=''; location.reload(); }
+function wekker(){ clearTimeout(idleTo); if(KIOSK&&(tStart||alleKlaar())) idleTo=setTimeout(opnieuw,120000); }
+if(KIOSK){ ['pointerdown','keydown'].forEach(e=>addEventListener(e,wekker,{passive:true})); addEventListener('contextmenu',e=>e.preventDefault()); }
+
+/* taalwissel houdt kiosk- en badge-instellingen vast */
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+
+const plain=x=>x.replace(/\u00ad/g,'');
+function nietTekst(k,i){
+  const sys=SYS[cur], naam=plain(PART[k]), ww=(k==='motor'||k==='led')?'belong':'belongs';
+  const eigen=sys.slots.findIndex(s=>s.ok===k);
+  if(eigen>=0) return `${naam} ${ww} in this system, but at step ${eigen+1}: ${plain(STEP[eigen][0])}.`;
+  let t=NIET[sys.id][k]||'';
+  if(CAT[k]!==i) t=`${naam} ${ww} at step ${CAT[k]+1} (${plain(STEP[CAT[k]][0])}), not at step ${i+1} (${plain(STEP[i][0])}). `+t;
+  return t.trim();
+}
+function wisNiet(){ const n=$('niet'); n.hidden=true; n.textContent=''; }
+let lastWhy='', cur=0, picked=null, state=SYS.map(()=>Array(5).fill(null));
+const $=id=>document.getElementById(id);
+const svg=(k,s=34)=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true">${ICON[k]}</svg>`;
+
+function render(){
+  const sys=SYS[cur], st=state[cur];
+  const tb=$('tabs'), oud=tb.scrollLeft;
+  tb.innerHTML=SYS.map((s,i)=>`<button class="tab" data-i="${i}" aria-pressed="${i===cur}">${s.naam}${state[i].every(Boolean)?' <span class="done">✓</span>':''}</button>`).join('');
+  $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;picked=null;lastWhy='';$('hint').textContent='';wisNiet();render();});
+  tb.scrollLeft=oud;
+  /* actieve opdracht in beeld schuiven (alleen horizontaal, de pagina zelf blijft staan) */
+  const act=tb.querySelector('[aria-pressed="true"]');
+  if(act&&tb.scrollWidth>tb.clientWidth){ const doel=act.offsetLeft-(tb.clientWidth-act.offsetWidth)/2; tb.scrollTo({left:Math.max(0,doel),behavior:REDUCED?'auto':'smooth'}); }
+  $('goal').textContent=sys.doel;
+  $('chain').innerHTML=sys.slots.map((sl,i)=>{
+    const f=st[i];
+    return `<button class="slot${f?' filled':''}${picked&&!f?' armed':''}" data-i="${i}" ${f?'aria-disabled="true"':''}>
+      <span class="step"><span class="n">${i+1}</span><span class="sep"> · </span><span class="sn">${STEP[i][0]}</span></span>
+      ${f?`<span class="got">${svg(f,26)}<span>${PART[f]}</span></span><span class="why">${sl.why}</span>`:`<span class="ask">${STEP[i][1]}</span>`}
+    </button>`;}).join('');
+  $('chain').querySelectorAll('.slot').forEach(el=>{
+    const i=+el.dataset.i;
+    el.onclick=()=>{ if(picked) place(picked,i); };
+    el.ondragover=e=>{ if(!st[i]){e.preventDefault(); el.classList.add('over');} };
+    el.ondragleave=()=>el.classList.remove('over');
+    el.ondrop=e=>{ e.preventDefault(); el.classList.remove('over'); const k=e.dataTransfer.getData('text/plain'); if(k) place(k,i); };
+  });
+  const used=new Set(st.filter(Boolean));
+  const pool=ORDER.filter(k=>sys.slots.some(s=>s.ok===k)||sys.extra.includes(k));
+  $('parts').innerHTML=pool.map(k=>`<button class="part" draggable="${!used.has(k)}" data-k="${k}" aria-pressed="${picked===k}" ${used.has(k)?'disabled':''}>${svg(k)}${PART[k]}</button>`).join('');
+  $('parts').querySelectorAll('.part').forEach(b=>{
+    b.onclick=()=>{ picked = picked===b.dataset.k?null:b.dataset.k; wisNiet(); render(); };
+    b.ondragstart=e=>{ e.dataTransfer.setData('text/plain',b.dataset.k); };
+  });
+  const wb=$('whybox');
+  if(picked){ wb.className='whybox ask'; wb.textContent='Where does this go: '+PART[picked].replace(/\u00ad/g,'')+'? Tap a box above.'; }
+  else if(lastWhy){ wb.className='whybox'; wb.textContent=lastWhy; }
+  else { wb.className='whybox ask'; wb.textContent='Start at 1: what does the system need to sense? Pick a part below.'; }
+  const done=st.every(Boolean);
+  $('bin').hidden=done;
+  if(done) win(); else { $('win').hidden=true; stopSim(); }
+}
+function place(k,i){
+  const sys=SYS[cur], st=state[cur], sl=sys.slots[i];
+  if(st[i]) return;
+  if(!tStart) tStart=Date.now();
+  if(k===sl.ok){
+    st[i]=k; if(alleKlaar()&&!tEind) tEind=Date.now(); picked=null; wisNiet(); lastWhy=(i+1)+' · '+PART[k].replace(/\u00ad/g,'')+': '+sl.why;
+    $('hint').className='hint good';
+    $('hint').textContent=st.every(Boolean)?'It works!':'Nice. '+(5-st.filter(Boolean).length)+' to go.';
+    render();
+  } else {
+    missers++;
+    $('hint').className='hint';
+    $('hint').innerHTML=PART[k]+'? Almost. '+sl.hint+' <button class="nietbtn" id="nietbtn" aria-expanded="false" aria-controls="niet">why not?</button>';
+    wisNiet(); const uitleg=nietTekst(k,i);
+    $('nietbtn').onclick=()=>{ const n=$('niet'), open=n.hidden; n.textContent=uitleg; n.hidden=!open; $('nietbtn').setAttribute('aria-expanded',String(open)); };
+    const el=$('chain').querySelector(`.slot[data-i="${i}"]`);
+    el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
+  }
+}
+function win(){
+  const sys=SYS[cur], next=SYS.findIndex((s,i)=>!state[i].every(Boolean));
+  $('win').hidden=false;
+  const fin=alleKlaar()?finaleHTML():null;
+  $('win').innerHTML=(fin?fin.html:'')+`<div class="win"><h2>Your ${sys.naam.toLowerCase()} works!</h2>
+   <div class="simbox"><canvas id="sim" role="img" aria-label="Animation: the ${sys.naam.toLowerCase()} at work"></canvas><div class="simcap" id="simcap"></div></div>
+   <div class="tirol"><h3>What does a TI engineer do here?</h3>
+    <div>${ROL[sys.id]}</div>
+    <ul><li>You <b>program the chip</b> that controls everything, in C and C++.</li><li>You make sensor, chip, motor and app <b>talk to each other</b>.</li><li>You make sure it works <b>reliably, efficiently and safely</b>, even when something goes wrong.</li></ul>
+    <div class="punch">Anyone can buy the parts. Turning them into a working system: that is what you learn at TI.</div></div>
+   <details class="puzzels"><summary>The puzzles a TI engineer solves here</summary>
+    <ol>${PUZZEL[sys.id].map(p=>'<li>'+p+'</li>').join('')}</ol>
+    <div class="leuk">There is never just one right answer. You come up with something, test it and see straight away whether it works. That is what makes it fun.</div></details>
+   ${next>=0?`<button class="btn" id="nx">Next: ${SYS[next].naam} →</button>`:`<div>Ask a student which system they enjoyed building most.</div>`}
+   <div class="small">Some parts were left over. They belong to the other systems in this game.</div></div>`;
+  const nx=$('nx'); if(nx) nx.onclick=()=>{if(next<0)return;cur=next;picked=null;lastWhy='';$('hint').textContent='';wisNiet();render();window.scrollTo(0,0);};
+  if(fin){ const s2=$('badgeslot2'); if(s2) badgeBox(s2,fin.b); const o=$('opnieuw'); if(o) o.onclick=opnieuw; }
+  startSim(sys.id);
+  if(matchMedia('(max-width:720px)').matches) setTimeout(()=>$('win').scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'start'}),120);
+}
+
+/* ---------- simulatie: het gebouwde systeem in werking ---------- */
+let simRaf=0;
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INK='#15201A', PEN='#24408E', RED='#D23C3C', OK='#12804A', ORA='#C46A00';
+function stopSim(){ cancelAnimationFrame(simRaf); simRaf=0; }
+function startSim(id){
+  stopSim();
+  const cv=$('sim'); if(!cv) return;
+  const CW=cv.parentElement.clientWidth;
+  /* op smalle schermen tekenen we op een vaste 560 breed en schalen we het geheel, zodat niets over elkaar valt */
+  const W=Math.max(560,CW), H=CW<560?330:Math.round(Math.min(300,Math.max(220,CW*0.42)));
+  const s=CW/W, CH=Math.round(H*s);
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr); cv.style.width=CW+'px'; cv.style.height=CH+'px';
+  const g=cv.getContext('2d'); g.setTransform(dpr*s,0,0,dpr*s,0,0);
+  const draw=SIM[id]; const t0=performance.now();
+  $('simcap').innerHTML=CAP[id].map((c,j)=>'<span>'+(j+1)+' · '+STEP[j][0].replace(/\u00ad/g,'')+': '+c+'</span>').join('');
+  const capEls=[...$('simcap').children];
+  const slots=[...$('chain').querySelectorAll('.slot')];
+  const frame=now=>{
+    const t=REDUCED?5.2:((now-t0)/1000)%7;
+    g.clearRect(0,0,W,H);
+    const step=draw(g,W,H,t);
+    slots.forEach((s,j)=>s.classList.toggle('pulse',j===step));
+    capEls.forEach((el,j)=>el.classList.toggle('on',j===step));
+    if(!REDUCED) simRaf=requestAnimationFrame(frame);
+  };
+  simRaf=requestAnimationFrame(frame);
+}
+const ROL={
+ deurbel:"Without software this is just a box with a camera and a button. The code is what turns it into a doorbell that understands someone is there and sends you an image straight away.",
+ robotauto:"The motors and the sensor do nothing on their own. Your code decides dozens of times per second: keep going, brake or steer.",
+ hartmonitor:"Nothing may go wrong here. The software has to recognise a real heart rhythm problem, run for weeks on one battery and only warn when it is needed.",
+ beregening:"In the middle of a field, without a socket or Wi-Fi. The software has to be frugal, measure reliably and transmit over kilometres.",
+ verkeerslicht:"A mistake here can cause an accident. The software must always switch safely and be thoroughly tested.",
+ dijk:"A false alarm is annoying, a missed alarm is dangerous. The software has to tell real danger from a ripple."
+};
+const CAP={
+ deurbel:["the camera sees someone standing at the door","the microcontroller recognises: someone rang","the loudspeaker plays the bell inside","the image goes to the internet over Wi-Fi","on your phone you see who is there"],
+ robotauto:["the distance sensor measures how far the wall is","the microcontroller decides: brake and turn","the motors steer the car around the corner","the measurements go to the team over Wi-Fi","the dashboard shows the distance per second"],
+ hartmonitor:["the sensor measures every heartbeat","the microcontroller spots an irregular beat","the vibration motor warns the wearer","Bluetooth sends the measurement on, using little power","the app shows the heart rate and the warning"],
+ beregening:["the sensor measures: the soil is too dry","the microcontroller decides: give water","the pump waters the plant","LoRa sends the measurement kilometres away","the farmer sees on the dashboard how wet each field is"],
+ dijk:["the sensor measures: the water is rising","the microcontroller sees: above the safe limit","the siren warns the neighbourhood","LoRa sends the measurement to the water board","the water board sees the water rise on the dashboard"],
+ verkeerslicht:["the camera counts the waiting cyclists","the microcontroller decides: green sooner","the lights switch to green","the cable sends it to the control centre","the control centre sees how many cyclists were waiting at each junction"]
+};
+function ln(g,pts,c=INK,w=3,dash){g.beginPath();g.setLineDash(dash||[]);g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';g.lineJoin='round';pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();g.setLineDash([]);}
+function box(g,x,y,w,h,c=INK,fill='#FFFFFF',lw=3){g.fillStyle=fill;g.strokeStyle=c;g.lineWidth=lw;g.beginPath();g.roundRect?g.roundRect(x,y,w,h,6):g.rect(x,y,w,h);g.fill();g.stroke();}
+function txt(g,s,x,y,c=INK,size=18,align='center'){g.fillStyle=c;g.font=`700 ${size}px Caveat, "Segoe Print", cursive`;g.textAlign=align;g.fillText(s,x,y);}
+function arcs(g,x,y,n,r0,dr,a0,a1,c,alpha){for(let i=0;i<n;i++){g.globalAlpha=Math.max(0,alpha-i*0.25);g.beginPath();g.strokeStyle=c;g.lineWidth=3;g.arc(x,y,r0+i*dr,a0,a1);g.stroke();}g.globalAlpha=1;}
+function phone(g,x,y,w,h,shake=0){const dx=shake?Math.sin(performance.now()/25)*shake:0;box(g,x+dx,y,w,h,INK,'#FFFFFF',3);ln(g,[[x+dx+w*0.35,y+h-8],[x+dx+w*0.65,y+h-8]],INK,2);return x+dx;}
+function chip(g,x,y,s,on){box(g,x,y,s,s,OK,on?'#D5F0DF':'#FFFFFF',3);for(let i=1;i<4;i++){const o=s*i/4;ln(g,[[x+o,y],[x+o,y-7]],OK,2);ln(g,[[x+o,y+s],[x+o,y+s+7]],OK,2);ln(g,[[x,y+o],[x-7,y+o]],OK,2);ln(g,[[x+s,y+o],[x+s+7,y+o]],OK,2);}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+const SIM={
+ deurbel(g,W,H,t){
+  const gy=H-40, door=W*0.30;
+  ln(g,[[10,gy],[W-10,gy]],INK,2);
+  box(g,door,gy-150,70,150,INK,'#FCE5C4',3);           // deur
+  const px=clamp(20+t*70,20,door-40);                  // persoon loopt naar de deur
+  g.beginPath();g.arc(px,gy-92,11,0,7);g.strokeStyle=INK;g.lineWidth=3;g.stroke();
+  const leg=Math.sin(t*9)*(px<door-41?8:0);
+  ln(g,[[px,gy-81],[px,gy-45]]);ln(g,[[px,gy-45],[px-8+leg,gy]]);ln(g,[[px,gy-45],[px+8-leg,gy]]);ln(g,[[px,gy-70],[px+16,gy-58]]);
+  box(g,door-22,gy-120,18,14,PEN,'#FFFFFF',2.5);       // camera
+  let step=-1;
+  if(t>1.6){step=0; g.globalAlpha=.25;g.fillStyle=PEN;g.beginPath();g.moveTo(door-22,gy-113);g.lineTo(px-20,gy-130);g.lineTo(px-20,gy-30);g.closePath();g.fill();g.globalAlpha=1;}
+  const cx=door+120, cy=gy-120; chip(g,cx,cy,44,t>2.4); txt(g,'chip',cx+22,cy+66,OK,18);
+  if(t>2.4) step=1;
+  ln(g,[[door-4,gy-113],[cx-8,cy+22]],t>2.4?OK:'#9AA6B2',2.5,[6,6]);
+  const sx=door+215, sy=gy-130;                        // luidspreker
+  ln(g,[[sx,sy+12],[sx+12,sy+12],[sx+26,sy],[sx+26,sy+44],[sx+12,sy+32],[sx,sy+32],[sx,sy+12]],ORA,3);
+  if(t>3.2){step=2; arcs(g,sx+30,sy+22,3,10,10,-0.8,0.8,ORA,1-((t-3.2)%0.8));}
+  txt(g,'ding-dong!',sx+20,sy-12,ORA,20);
+  const phx=W-90, phy=gy-170;
+  if(t>4.0){step=3; const p=clamp((t-4)/1.0,0,1); for(let i=0;i<3;i++){const xx=cx+60+(phx-cx-60)*clamp(p-i*0.15,0,1); arcs(g,xx,gy-150,1,8,0,-2.4,-0.7,PEN,0.9);} }
+  const ox=phone(g,phx,phy,60,110);
+  if(t>5.0){step=4; box(g,ox+8,phy+10,44,70,PEN,'#EEF3FB',2); g.beginPath();g.arc(ox+30,phy+34,8,0,7);g.strokeStyle=INK;g.lineWidth=2.5;g.stroke(); ln(g,[[ox+18,phy+64],[ox+30,phy+46],[ox+42,phy+64]],INK,2.5); txt(g,'someone is there',ox+30-40,phy+130,PEN,18);}
+  return step;
+ },
+ robotauto(g,W,H,t){
+  const ax=14, ay=14, aw=W*0.62, ah=H-28;
+  box(g,ax,ay,aw,ah,INK,'#FFFFFF',3);                   // arena
+  ln(g,[[ax+aw-10,ay+6],[ax+aw-10,ay+ah-6]],RED,6);      // muur
+  const wallX=ax+aw-16;
+  // pad: rechtdoor tot muur, dan bocht naar beneden
+  const stopX=wallX-70; let x,y,ang;
+  const v=90, d1=stopX-(ax+40);
+  const tt=t*v;
+  if(tt<d1){x=ax+40+tt;y=ay+ah*0.35;ang=0;}
+  else{const a=clamp((tt-d1)/110,0,1);ang=a*Math.PI/2;x=stopX+Math.sin(ang)*30;y=ay+ah*0.35+(1-Math.cos(ang))*30+Math.max(0,tt-d1-110)*0.6;y=Math.min(y,ay+ah-30);}
+  const dist=Math.max(0,Math.round((wallX-x-20)/3));
+  g.save();g.translate(x,y);g.rotate(ang);
+  box(g,-22,-14,44,28,INK,'#E6E8EA',3);
+  ln(g,[[-14,-18],[-4,-18]],INK,5);ln(g,[[4,-18],[14,-18]],INK,5);ln(g,[[-14,18],[-4,18]],INK,5);ln(g,[[4,18],[14,18]],INK,5);
+  g.restore();
+  let step=0;
+  if(ang<0.05){ln(g,[[x+22,y],[wallX,y]],PEN,2,[4,6]); txt(g,dist+' cm',(x+wallX)/2,y-10,PEN,18);}
+  if(tt>=d1-40) step=1; if(tt>=d1) step=2;
+  if(t>4.2) step=3; if(t>5.2) step=4;
+  // dashboard
+  const dx=ax+aw+24, dw=W-dx-12, dy=ay+20, dh=ah-60;
+  box(g,dx,dy,dw,dh,INK,'#FFFFFF',3); txt(g,'dashboard',dx+dw/2,dy+dh+26,INK,20);
+  if(t>4.2) arcs(g,ax+aw+8,ay+ah*0.2,2,6,8,-0.9,0.9,PEN,0.8);
+  g.beginPath();g.strokeStyle=OK;g.lineWidth=2.5;
+  const N=Math.floor(clamp(t,0,6)*10);
+  for(let i=0;i<=N;i++){const ti=i/10, xi=ax+40+ti*v; const di=Math.max(0,(wallX-xi-20)/3); const px=dx+8+(dw-16)*i/60, py=dy+dh-8-(dh-16)*Math.min(1,(ti*v<d1?di:0)/((wallX-ax-60)/3)); i?g.lineTo(px,py):g.moveTo(px,py);}
+  g.stroke();
+  return step;
+ },
+ beregening(g,W,H,t){
+  const gy=H-50;
+  g.fillStyle='#E9DCC4'; g.fillRect(10,gy,W*0.6,40); ln(g,[[10,gy],[W*0.6+10,gy]],INK,3);
+  const wet=t>3.2?Math.min(1,(t-3.2)/1.5):0;
+  const droop=(1-wet)*0.6; const px=W*0.25;
+  g.save(); g.translate(px,gy); g.rotate(droop); ln(g,[[0,0],[0,-80]],OK,4); ln(g,[[0,-40],[-24,-58]],OK,3.5); ln(g,[[0,-55],[22,-72]],OK,3.5); g.restore();
+  const sx=W*0.38; ln(g,[[sx,gy+30],[sx,gy-40]],INK,4); box(g,sx-14,gy-62,28,22,PEN,'#FFFFFF',2.5);
+  txt(g,Math.round(20+wet*25)+'%',sx,gy-70,wet>0.5?OK:RED,20);
+  ln(g,[[W*0.08,gy-110],[px+30,gy-110]],INK,4);
+  if(t>3.2) for(let i=0;i<4;i++){const ph=(t*1.8+i/4)%1; g.beginPath(); g.arc(px-10+i*10,gy-104+ph*90,3.5,0,7); g.fillStyle=PEN; g.fill();}
+  chip(g,W*0.47,gy-120,34,t>2.2);
+  let step=-1; if(t>0.8)step=0; if(t>2.2)step=1; if(t>3.2)step=2; if(t>4.4)step=3; if(t>5.4)step=4;
+  const fx=W-120, fy=40;
+  ln(g,[[fx,fy+40],[fx+30,fy+10],[fx+60,fy+40]],INK,3); box(g,fx+6,fy+40,48,36,INK,'#FFFFFF',3); txt(g,'farm',fx+30,fy+96,INK,18);
+  if(t>4.4){const p=clamp((t-4.4)/1.0,0,1); for(let i=0;i<4;i++){const xx=W*0.52+(fx-20-W*0.52)*clamp(p-i*0.12,0,1); arcs(g,xx,fy+60,1,10,0,-2.4,-0.7,PEN,0.9);} }
+  if(t>5.4){const bx=fx-10, by=fy+120; box(g,bx,by,80,60,INK,'#FFFFFF',2.5); [0.45,0.7,0.35].forEach((v,i)=>{g.fillStyle=i===0?OK:'#6FBF95'; g.fillRect(bx+10+i*22,by+52-v*44,14,v*44);});}
+  return step;
+ },
+ verkeerslicht(g,W,H,t){
+  const ry=H*0.62; g.fillStyle='#E6E8EA'; g.fillRect(10,ry-30,W*0.62,60); ln(g,[[W*0.42,ry-30],[W*0.42,ry+30]],INK,4,[6,6]);
+  const lx=W*0.46; ln(g,[[lx,ry-30],[lx,40]],INK,4); box(g,lx-14,40,28,70,INK,'#15201A',2);
+  const green=t>3.2&&t<6.6;
+  g.beginPath();g.arc(lx,58,9,0,7);g.fillStyle=green?'#4A1414':RED;g.fill();
+  g.beginPath();g.arc(lx,92,9,0,7);g.fillStyle=green?'#3BD17A':'#163A26';g.fill();
+  box(g,lx-46,52,20,14,PEN,'#FFFFFF',2.5);
+  const n=6;
+  for(let i=0;i<n;i++){
+    let x=W*0.38-i*34; if(green) x+= (t-3.2)*140 - i*12; if(x<20) continue; if(x>W*0.62) continue;
+    g.beginPath();g.arc(x-10,ry+14,8,0,7);g.strokeStyle=INK;g.lineWidth=2.5;g.stroke();
+    g.beginPath();g.arc(x+10,ry+14,8,0,7);g.stroke();
+    ln(g,[[x-10,ry+14],[x,ry],[x+10,ry+14]],INK,2.5); g.beginPath();g.arc(x,ry-14,5,0,7);g.stroke();
+  }
+  if(t>0.8&&t<3.2){g.globalAlpha=.2;g.fillStyle=PEN;g.beginPath();g.moveTo(lx-46,59);g.lineTo(W*0.38-n*34,ry+30);g.lineTo(W*0.4,ry+30);g.closePath();g.fill();g.globalAlpha=1;}
+  chip(g,lx+30,ry+40,30,t>2.2);
+  let step=-1; if(t>0.8)step=0; if(t>2.2)step=1; if(t>3.2)step=2; if(t>4.4)step=3; if(t>5.4)step=4;
+  txt(g,t>0.8?'6 cyclists':'',W*0.2,ry-44,PEN,20);
+  const cx=W-130, cy=40;
+  ln(g,[[lx+45,ry+70],[lx+45,H-12],[cx+50,H-12],[cx+50,cy+90]],t>4.4?OK:'#9AA6B2',3,[8,6]);
+  box(g,cx,cy,100,90,INK,'#FFFFFF',3); txt(g,'control centre',cx+50,cy-8,INK,18);
+  if(t>5.4){txt(g,'junction 12',cx+50,cy+30,INK,18); txt(g,'6 cyclists',cx+50,cy+58,OK,22);}
+  return step;
+ },
+ dijk(g,W,H,t){
+  const base=H-30, crest=60, dx=W*0.32;
+  g.fillStyle='#D5F0DF'; g.beginPath(); g.moveTo(dx-120,base); g.lineTo(dx-40,crest); g.lineTo(dx+40,crest); g.lineTo(dx+130,base); g.closePath(); g.fill(); ln(g,[[dx-120,base],[dx-40,crest],[dx+40,crest],[dx+130,base]],OK,3);
+  const lvl=base-40-Math.min(1,t/3.4)*(base-crest-70);
+  g.fillStyle='#9CC3EE'; g.beginPath(); g.moveTo(10,base); g.lineTo(10,lvl);
+  for(let x=10;x<=dx-120+(base-lvl)*0.47;x+=8) g.lineTo(x,lvl+Math.sin(x/14+t*3)*3);
+  g.lineTo(dx-120+(base-lvl)*0.47,lvl); g.lineTo(dx-120,base); g.closePath(); g.fill();
+  const limit=crest+60; ln(g,[[10,limit],[dx-60,limit]],RED,2.5,[8,6]); txt(g,'safe limit',60,limit-8,RED,18,'left');
+  const px=dx-150; ln(g,[[px,base],[px,crest-10]],INK,4); box(g,px-12,crest-30,24,20,PEN,'#FFFFFF',2.5);
+  const danger=lvl<limit; chip(g,px+36,crest-36,30,t>2.2);
+  let step=-1; if(t>0.6)step=0; if(t>2.2)step=1; if(danger)step=2; if(t>4.4)step=3; if(t>5.4)step=4;
+  if(danger) arcs(g,px+80,crest-22,3,10,10,-0.8,0.8,RED,1-((t*1.5)%1));
+  const wx=W-130, wy=40; box(g,wx,wy+30,100,56,INK,'#FFFFFF',3); ln(g,[[wx,wy+30],[wx+50,wy],[wx+100,wy+30]],INK,3); txt(g,'water board',wx+50,wy+104,INK,18);
+  if(t>4.4){const p=clamp((t-4.4)/1.0,0,1); for(let i=0;i<4;i++){const xx=px+120+(wx-20-px-120)*clamp(p-i*0.12,0,1); arcs(g,xx,wy+70,1,10,0,-2.4,-0.7,PEN,0.9);}}
+  if(t>5.4){const bx=wx-30, by=wy+120, bw=150, bh=70; box(g,bx,by,bw,bh,INK,'#FFFFFF',2.5); ln(g,[[bx+8,by+20],[bx+bw-8,by+20]],RED,2,[5,4]); g.beginPath();g.strokeStyle=PEN;g.lineWidth=2.5; for(let i=0;i<=20;i++){const xx=bx+8+(bw-16)*i/20, yy=by+bh-8-(bh-24)*Math.min(1,(i/20)*1.15); i?g.lineTo(xx,yy):g.moveTo(xx,yy);} g.stroke();}
+  return step;
+ },
+ hartmonitor(g,W,H,t){
+  const mx=14, my=20, mw=W*0.58, mh=H-60;
+  box(g,mx,my,mw,mh,INK,'#FFFFFF',3);
+  g.beginPath();g.strokeStyle=RED;g.lineWidth=3;
+  const base=my+mh*0.6, speed=120, off=t*speed;
+  for(let px=0;px<=mw-12;px+=2){
+    const s=(px+off)/speed; const beat=s%1; const k=Math.floor(s);
+    const odd=(k===4); // één onregelmatige slag
+    let yv=0; const b=odd?beat*1.6%1:beat;
+    if(b>0.30&&b<0.34)yv=-8; else if(b>0.40&&b<0.43)yv=12; else if(b>0.43&&b<0.47)yv=-(odd?70:50); else if(b>0.47&&b<0.50)yv=16; else if(b>0.62&&b<0.72)yv=-10*Math.sin((b-0.62)/0.1*Math.PI);
+    const X=mx+6+px, Y=base+yv; px?g.lineTo(X,Y):g.moveTo(X,Y);
+  }
+  g.stroke();
+  const irregular=t>3.6&&t<6.4;
+  txt(g,(irregular?'irregular!':'72 beats per minute'),mx+mw/2,my+mh+28,irregular?RED:INK,20);
+  let step=0; if(t>2.2)step=1; if(irregular)step=2; if(t>4.6)step=3; if(t>5.4)step=4;
+  const cx=mx+mw+20; chip(g,cx,my+20,36,t>2.2);
+  const phx=W-80, phy=my+10;
+  if(t>4.6){ g.save(); g.translate(cx+60,my+90); ln(g,[[-6,-8],[6,4],[0,10],[0,-10],[6,-4],[-6,8]],PEN,2.5); g.restore(); arcs(g,cx+60,my+90,2,14,8,-0.9,0.9,PEN,0.9);}
+  const ox=phone(g,phx,phy,60,110,irregular&&t>3.6&&t<4.6?3:0);
+  if(irregular&&t<4.6){ln(g,[[ox-10,phy+30],[ox-4,phy+40],[ox-10,phy+50]],INK,2.5);ln(g,[[ox+70,phy+30],[ox+64,phy+40],[ox+70,phy+50]],INK,2.5);}
+  if(t>5.4){box(g,ox+8,phy+10,44,70,RED,'#FDE2E4',2);txt(g,'72',ox+30,phy+42,INK,24);txt(g,'alert',ox+30,phy+66,RED,16);}
+  return step;
+ }
+};
+const BH=/^#badge=(\d{1,3})$/.exec(location.hash);
+if(BH){ document.querySelector('main.wrap').hidden=true; $('badgeview').hidden=false; badgeBox($('badgeslot'),{m:+BH[1],d:OPENDAG}); }
+else render();
+</script>
+</body>
+</html>
