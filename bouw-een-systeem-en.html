@@ -76,7 +76,7 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 .puzzels ol{margin:8px 0 6px;padding-left:22px;display:flex;flex-direction:column;gap:8px}
 .puzzels .leuk{font-family:var(--hand);font-weight:700;font-size:24px;line-height:1.1;color:var(--ok)}
 [hidden]{display:none !important}
-.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:6px 2px;min-height:32px;white-space:nowrap}
+
 .finale{position:relative;background:var(--card);border:3.5px solid var(--ink);border-radius:12px 26px 10px 22px/22px 10px 26px 12px;padding:22px 20px 20px;box-shadow:5px 6px 0 rgba(21,32,26,.15);display:flex;flex-direction:column;gap:12px;transform:rotate(.4deg)}
 .finale h2{font-size:clamp(36px,8vw,52px)}
 .finale p{margin:0;max-width:62ch}
@@ -132,11 +132,15 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
   #win{padding-bottom:24px}
 }
 @media (prefers-reduced-motion:reduce){.slot.wrong{animation:none}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
 </style>
 
 <main class="wrap" lang="en">
-  <a href="./samenvatting-en.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;align-self:flex-start">← back to the overview</a>
-  <!--  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="kick">Saxion open day · Technische Informatica (TI)</div><a class="taal" href="bouw-een-systeem.html" lang="nl" hreflang="nl">Nederlands</a></div> -->
+  <div class="topbar"><button type="button" class="reset">↺ Start over</button><a class="taal" href="bouw-een-systeem.html" lang="nl" hreflang="nl">Dutch</a></div>
   <h1>Build a <span class="hl">system</span></h1>
   <p class="intro-short">Every smart device <b>senses</b>, <b>thinks</b>, <b>acts</b>, <b>sends</b> the data on and <b>shows</b> it. Tap a part at the bottom, then the box where it belongs.</p>
   <p class="intro-long" style="margin:0;max-width:62ch">Every smart device follows the same five steps: it <b>senses</b> something, <b>thinks</b> about it, <b>acts</b>, <b>sends</b> the data on and <b>shows</b> it to a person. Put the right parts in the right place. Drag them, or tap a part first and then a box.</p>
@@ -151,6 +155,7 @@ button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
     <div class="parts" id="parts"></div>
   </div>
   <div id="win" hidden></div>
+<button type="button" class="reset reset-onder">↺ Start over</button>
 </main>
 <main class="wrap" id="badgeview" lang="en" hidden>
   <div class="kick">Saxion open day · Technische Informatica (TI)</div>
@@ -339,8 +344,6 @@ function opnieuw(){ location.hash=''; location.reload(); }
 function wekker(){ clearTimeout(idleTo); if(KIOSK&&(tStart||alleKlaar())) idleTo=setTimeout(opnieuw,120000); }
 if(KIOSK){ ['pointerdown','keydown'].forEach(e=>addEventListener(e,wekker,{passive:true})); addEventListener('contextmenu',e=>e.preventDefault()); }
 
-/* taalwissel houdt kiosk- en badge-instellingen vast */
-document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
 
 const plain=x=>x.replace(/\u00ad/g,'');
 function nietTekst(k,i){
@@ -629,6 +632,15 @@ const SIM={
 const BH=/^#badge=(\d{1,3})$/.exec(location.hash);
 if(BH){ document.querySelector('main.wrap').hidden=true; $('badgeview').hidden=false; badgeBox($('badgeslot'),{m:+BH[1],d:OPENDAG}); }
 else render();
+</script>
+<script>
+/* opnieuw beginnen voor de volgende bezoeker; taalwissel houdt kiosk-instellingen vast */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+document.querySelectorAll('.reset').forEach(b=>b.addEventListener('click',()=>{
+  if(typeof window.resetPagina==='function'){ window.resetPagina(); window.scrollTo(0,0); }
+  else location.replace(location.pathname+location.search);
+}));
 </script>
 </body>
 </html>

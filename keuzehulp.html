@@ -56,10 +56,15 @@ input[type=range]:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
 .c a{color:var(--pen);font-weight:700}
 .small{font-size:14.5px;color:var(--ink2)}
 @media (prefers-reduced-motion:reduce){.line .you,.line .youlab,.bar i{transition:none}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
 </style>
 
 <main class="wrap">
-  <a href="./samenvatting.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;align-self:flex-start">← terug naar het overzicht</a>
+  <div class="topbar"><button type="button" class="reset">↺ Opnieuw beginnen</button><a class="taal" href="keuzehulp-en.html" lang="en" hreflang="en">English</a></div>
   <div class="kick">opendag Saxion · drie opleidingen naast elkaar</div>
   <h1>TI, HBO-ICT of <span class="hl">Elektrotechniek?</span></h1>
   <p style="margin:0">Schuif bij elke vraag naar de kant die het meest bij je past. Vind je allebei even leuk? Laat het schuifje dan in het midden staan, ook dat is een antwoord. De uitslag verandert meteen mee en kan ook een andere opleiding dan TI zijn.</p>
@@ -85,6 +90,7 @@ input[type=range]:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
     <div class="c" style="border-color:var(--ict)"><b style="color:var(--ict)">HBO-ICT</b><span>Je maakt apps, websites, databases en systemen voor mensen en bedrijven.</span><a href="https://www.saxion.nl/opleidingen/en/fulltime/bachelor/hbo-ict">opleiding bij Saxion</a><a href="https://www.studiekeuze123.nl/opleidingen/1628-ict-saxion-hbo-bachelor" class="small">cijfers op Studiekeuze123</a></div>
   </div>
   <p class="small" style="margin:0">Er wordt niets opgeslagen of verstuurd. Dit is een gesprekshulp, geen test. Twijfel je tussen twee? Loop bij allebei een dag mee.</p>
+<button type="button" class="reset reset-onder">↺ Opnieuw beginnen</button>
 </main>
 
 <script>
@@ -135,6 +141,16 @@ function upd(){
   document.getElementById('verdict').innerHTML=t;
 }
 qs.addEventListener('input',upd); upd();
+</script>
+<script>
+window.resetPagina=()=>{ document.querySelectorAll('#qs input[type=range]').forEach(r=>r.value=50); upd(); };
+/* opnieuw beginnen voor de volgende bezoeker; taalwissel houdt kiosk-instellingen vast */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+document.querySelectorAll('.reset').forEach(b=>b.addEventListener('click',()=>{
+  if(typeof window.resetPagina==='function'){ window.resetPagina(); window.scrollTo(0,0); }
+  else location.replace(location.pathname+location.search);
+}));
 </script>
 </body>
 </html>

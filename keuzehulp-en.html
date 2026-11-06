@@ -56,10 +56,15 @@ input[type=range]:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
 .c a{color:var(--pen);font-weight:700}
 .small{font-size:14.5px;color:var(--ink2)}
 @media (prefers-reduced-motion:reduce){.line .you,.line .youlab,.bar i{transition:none}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
 </style>
 
 <main class="wrap">
-	<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><a href="./samenvatting-en.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">← back to the overview</a><!--<a href="keuzehulp.html" lang="nl" hreflang="nl" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">Nederlands</a>--></div>
+  <div class="topbar"><button type="button" class="reset">↺ Start over</button><a class="taal" href="keuzehulp.html" lang="nl" hreflang="nl">Dutch</a></div>
   <div class="kick">Saxion open day · three programmes side by side</div>
   <h1>TI, HBO-ICT or <span class="hl">Electrical Engineering?</span></h1>
   <p style="margin:0">For each question, slide towards the side that suits you best. Like both just as much? Then leave the slider in the middle: that is an answer too. The result changes as you go and it may well be a programme other than TI.</p>
@@ -85,6 +90,7 @@ input[type=range]:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
     <div class="c" style="border-color:var(--ict)"><b style="color:var(--ict)">HBO-ICT</b><span>You build apps, websites, databases and systems for people and companies.</span><a href="https://www.saxion.nl/opleidingen/en/fulltime/bachelor/hbo-ict">programme at Saxion</a><a href="https://www.studiekeuze123.nl/opleidingen/1628-ict-saxion-hbo-bachelor" class="small">figures on Studiekeuze123 (Dutch)</a></div>
   </div>
   <p class="small" style="margin:0">Nothing is stored or sent. This is a conversation starter, not a test. Torn between two? Spend a trial day at both.</p>
+<button type="button" class="reset reset-onder">↺ Start over</button>
 </main>
 
 <script>
@@ -135,6 +141,16 @@ function upd(){
   document.getElementById('verdict').innerHTML=t;
 }
 qs.addEventListener('input',upd); upd();
+</script>
+<script>
+window.resetPagina=()=>{ document.querySelectorAll('#qs input[type=range]').forEach(r=>r.value=50); upd(); };
+/* opnieuw beginnen voor de volgende bezoeker; taalwissel houdt kiosk-instellingen vast */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+document.querySelectorAll('.reset').forEach(b=>b.addEventListener('click',()=>{
+  if(typeof window.resetPagina==='function'){ window.resetPagina(); window.scrollTo(0,0); }
+  else location.replace(location.pathname+location.search);
+}));
 </script>
 </body>
 </html>

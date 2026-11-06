@@ -48,9 +48,14 @@ ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .bar i{display:block;height:100%;background:var(--pen)}
 .red{color:var(--red)}
 @media (prefers-reduced-motion:reduce){.opt{transition:none}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
 </style>
 
-<div style="display:flex;justify-content:space-between;gap:12px;max-width:560px;margin:0 auto 12px"><a href="./samenvatting-en.html" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">← back to the overview</a><!--<a href="welke-tier.html" lang="nl" hreflang="nl" style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px">Nederlands</a>--></div>
+<div style="max-width:560px;margin:0 auto 12px"><div class="topbar"><button type="button" class="reset">↺ Start over</button><a class="taal" href="welke-tier.html" lang="nl" hreflang="nl">Dutch</a></div></div>
 <main class="wrap" id="app" aria-live="polite"></main>
 
 <script>
@@ -169,6 +174,16 @@ function uitslag(){
   window.scrollTo(0,0);
 }
 start();
+</script>
+<script>
+window.resetPagina=()=>{ start(); };
+/* opnieuw beginnen voor de volgende bezoeker; taalwissel houdt kiosk-instellingen vast */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+document.querySelectorAll('.reset').forEach(b=>b.addEventListener('click',()=>{
+  if(typeof window.resetPagina==='function'){ window.resetPagina(); window.scrollTo(0,0); }
+  else location.replace(location.pathname+location.search);
+}));
 </script>
 </body>
 </html>

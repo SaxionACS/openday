@@ -74,12 +74,18 @@ ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .bron{font-size:14px;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
 .bron a{font-weight:700}
 footer{border-top:2.5px solid var(--ink);padding-top:14px;display:flex;flex-direction:column;gap:6px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
 </style>
 </head>
 <body>
 <main class="wrap">
 
 <header style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button type="button" class="reset">↺ Opnieuw beginnen</button><a class="taal" href="samenvatting-en.html" lang="en" hreflang="en">English</a></div>
   <div class="kick">opendag Technische Informatica · Saxion Enschede · 7 november 2026</div>
   <h1>Nog even <span class="hl">terugkijken</span></h1>
   <p>Fijn dat je er was. Hier staat alles van de opendag bij elkaar: de quiz, Bouw een systeem en de keuzehulp, wat je kunt worden, de cijfers en de vragen voor thuis. Lees het samen met wie je meenam. Heb je nog een vraag? <a href="#vraag">Stel hem hier</a>.</p>
@@ -231,10 +237,20 @@ footer{border-top:2.5px solid var(--ink);padding-top:14px;display:flex;flex-dire
   </div>
 </section>
 
+<button type="button" class="reset reset-onder">↺ Opnieuw beginnen</button>
 <footer>
   <p class="small">Opleiding Technische Informatica, Saxion Enschede. Cijfers zijn de stand van november 2026.</p>
   <p class="small">Deze pagina heeft geen teller en geen cookies. Er wordt niets bijgehouden van wie hem bekijkt. Wat je in het vragenformulier invult, ziet alleen het TI-team.</p>
 </footer>
 </main>
+<script>
+/* opnieuw beginnen voor de volgende bezoeker; taalwissel houdt kiosk-instellingen vast */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+document.querySelectorAll('a.taal').forEach(a=>{ if(location.search) a.href=a.getAttribute('href')+location.search; });
+document.querySelectorAll('.reset').forEach(b=>b.addEventListener('click',()=>{
+  if(typeof window.resetPagina==='function'){ window.resetPagina(); window.scrollTo(0,0); }
+  else location.replace(location.pathname+location.search);
+}));
+</script>
 </body>
 </html>
