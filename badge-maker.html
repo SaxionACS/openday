@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Je badge · Systeembouwer</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+</head>
+<body>
+<style>
+/* Layout: schriftblad. Boven een keten van 5 vakjes (waarnemen → denken → doen → verbinden → tonen), daaronder de onderdelenbak. Bewust één papieren look. */
+:root{
+  --paper:#FCF8EC; --grid:#E2E9F2; --ink:#15201A; --ink2:#33403A; --pen:#24408E; --red:#D23C3C;
+  --ok:#12804A; --okbg:#D5F0DF; --note:#FFF6B8; --card:#FFFFFF; --mark:rgba(255,214,0,.6); --tape:rgba(233,215,150,.85);
+  --hand:'Caveat','Segoe Print',cursive; --body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  color-scheme: light;
+}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.kick{font-family:var(--hand);font-weight:700;font-size:24px;color:var(--pen);transform:rotate(-1.5deg);transform-origin:left}
+h1{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(46px,10vw,72px);line-height:.92;text-wrap:balance}
+h2{margin:0;font-family:var(--hand);font-weight:700;font-size:clamp(30px,7vw,40px);line-height:1}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);padding:0 4px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;position:relative}
+.tab{font:inherit;font-family:var(--hand);font-weight:700;font-size:26px;padding:6px 16px;min-height:46px;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:8px 18px 8px 14px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:#fff}
+.tab .done{color:var(--ok)}
+.tab[aria-pressed="true"] .done{color:#9BE3B9}
+.chain{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;position:relative}
+.slot{font:inherit;color:var(--ink);text-align:left;min-height:150px;background:rgba(255,255,255,.7);border:2.5px dashed var(--ink2);border-radius:10px 20px 12px 18px/18px 12px 20px 10px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;position:relative}
+.slot.armed{border-color:var(--pen);background:#EEF3FB}
+.slot.over{border-color:var(--pen);border-style:solid}
+.slot.filled{border-style:solid;border-color:var(--ok);background:var(--okbg);cursor:default}
+.slot.wrong{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.slot .step{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1;color:var(--pen)}
+.slot .ask{font-size:15px;color:var(--ink2)}
+.slot .got{font-weight:700;font-size:15.5px;line-height:1.2;display:flex;gap:6px;align-items:center;min-width:0}
+.slot .got span{min-width:0;overflow-wrap:anywhere;hyphens:manual}
+.slot .why{font-size:14.5px;line-height:1.35}
+.slot.pulse{box-shadow:0 0 0 4px var(--mark)}
+.arrow{display:none}
+.hint{min-height:28px;font-family:var(--hand);font-weight:700;font-size:26px;line-height:1.1;color:var(--red)}
+.hint.good{color:var(--ok)}
+.bin{display:flex;flex-direction:column;gap:10px}
+.parts{display:flex;flex-wrap:wrap;gap:12px}
+.part{font:inherit;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px 16px 8px 12px/12px 8px 16px 6px;padding:8px 14px;min-height:48px;display:flex;gap:8px;align-items:center;cursor:grab;box-shadow:3px 3px 0 rgba(21,32,26,.13);touch-action:manipulation}
+.part:nth-child(odd){transform:rotate(-1deg)}
+.part:nth-child(even){transform:rotate(1deg)}
+.part[aria-pressed="true"]{background:var(--note);border-color:var(--pen);box-shadow:0 0 0 3px var(--pen)}
+.part[disabled]{opacity:.35;cursor:default;box-shadow:none}
+.part svg,.slot svg{flex-shrink:0}
+button:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.win{position:relative;background:var(--note);padding:24px 20px 18px;transform:rotate(-.6deg);box-shadow:4px 5px 0 rgba(21,32,26,.13);display:flex;flex-direction:column;gap:10px}
+.win::before{content:"";position:absolute;top:-11px;left:42%;width:80px;height:22px;background:var(--tape);transform:rotate(-3deg)}
+.btn{font:inherit;font-family:var(--hand);font-weight:700;font-size:28px;color:#fff;background:var(--ink);border:none;border-radius:10px 22px 10px 18px;padding:8px 22px;min-height:48px;cursor:pointer;align-self:flex-start}
+.small{font-size:14.5px;color:var(--ink2)}
+.simbox{background:#FFFFFF;border:2.5px solid var(--ink);border-radius:8px 18px 10px 14px/14px 10px 18px 8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.simbox canvas{display:block;max-width:100%}
+.simcap{display:grid;font-family:var(--hand);font-weight:700;font-size:26px;line-height:1.1;color:var(--pen)}
+.simcap span{grid-area:1/1;visibility:hidden}
+.simcap span.on{visibility:visible}
+.tirol{background:#FFFFFF;border:2.5px solid var(--ink);border-radius:10px 20px 8px 16px/16px 8px 20px 10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.tirol h3{margin:0;font-family:var(--hand);font-weight:700;font-size:30px;line-height:1}
+.tirol ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.tirol .punch{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1.1;color:var(--red)}
+@media (max-width:720px){.niet{font-size:14px;padding:6px 10px}.nietbtn{font-size:14px}.puzzels summary{font-size:24px}.puzzels .leuk{font-size:21px}.simcap{font-size:20px}.tirol h3{font-size:26px}.tirol .punch{font-size:24px}}
+.whybox{display:none}
+.nietbtn{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:none;border:none;text-decoration:underline;text-underline-offset:3px;padding:4px 4px;min-height:32px;cursor:pointer;vertical-align:middle}
+.niet{font-size:15.5px;line-height:1.4;background:var(--card);border-left:4px solid var(--red);padding:8px 12px;max-width:70ch}
+.puzzels{background:#FFFFFF;border:2.5px dashed var(--pen);border-radius:16px 8px 20px 10px/10px 20px 8px 16px;padding:10px 16px}
+.puzzels summary{font-family:var(--hand);font-weight:700;font-size:28px;line-height:1.1;color:var(--pen);cursor:pointer;min-height:40px;display:flex;align-items:center;gap:8px;list-style:none}
+.puzzels summary::-webkit-details-marker{display:none}
+.puzzels summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:2.5px solid var(--pen);border-radius:50%;font-family:var(--body);font-size:18px;flex-shrink:0}
+.puzzels[open] summary::before{content:"−"}
+.puzzels ol{margin:8px 0 6px;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.puzzels .leuk{font-family:var(--hand);font-weight:700;font-size:24px;line-height:1.1;color:var(--ok)}
+[hidden]{display:none !important}
+
+.finale{position:relative;background:var(--card);border:3.5px solid var(--ink);border-radius:12px 26px 10px 22px/22px 10px 26px 12px;padding:22px 20px 20px;box-shadow:5px 6px 0 rgba(21,32,26,.15);display:flex;flex-direction:column;gap:12px;transform:rotate(.4deg)}
+.finale h2{font-size:clamp(36px,8vw,52px)}
+.finale p{margin:0;max-width:62ch}
+.stats{display:flex;flex-wrap:wrap;gap:12px}
+.stats div{background:var(--note);padding:8px 14px 6px;display:flex;flex-direction:column;min-width:96px;transform:rotate(-1deg);box-shadow:2px 3px 0 rgba(21,32,26,.12)}
+.stats div:nth-child(2){transform:rotate(1deg)}
+.stats b{font-family:var(--hand);font-size:40px;line-height:1}
+@media (max-width:720px){.stats{flex-wrap:nowrap;gap:8px}.stats div{min-width:0;flex:1;padding:6px 8px 4px}.stats b{font-size:32px}.stats span{font-size:12.5px}}
+.stats span{font-size:14px;color:var(--ink2)}
+.badgebox{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.badgebox canvas{width:min(100%,360px);height:auto;border:2.5px solid var(--ink);border-radius:8px;box-shadow:4px 5px 0 rgba(21,32,26,.13);background:#FCF8EC}
+.badgeform{display:flex;flex-direction:column;gap:10px;min-width:220px;flex:1}
+.badgeform label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:15px}
+.badgeform input{font:inherit;font-size:18px;padding:8px 10px;min-height:44px;border:2.5px solid var(--ink);border-radius:6px 12px 8px 10px;background:#fff;color:var(--ink)}
+.qrrow{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.qr{background:#fff;padding:10px;border:2.5px solid var(--ink);border-radius:8px;width:230px;flex-shrink:0;transform:rotate(-1.5deg)}
+.qr svg{display:block;width:100%;height:auto}
+.qrrow h3{margin:0 0 4px;font-family:var(--hand);font-weight:700;font-size:38px;line-height:1}
+#badgeview{max-width:620px}
+.tip-phone{display:none}
+.tip-desk,.tip-phone{color:var(--ink2)}
+.intro-short{display:none}
+/* telefoon: compacte keten bovenaan, onderdelenbak vast onderin beeld */
+@media (max-width:720px){
+  body{padding-block:12px 0}
+  .wrap{gap:12px}
+  .kick{font-size:20px}
+  h1{font-size:44px}
+  h2{font-size:26px;line-height:1.05}
+  .intro-long{display:none}
+  .tip-desk{display:none}
+  .tip-phone{display:inline}
+  .intro-short{display:block;margin:0;font-size:15.5px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-inline:-4px;padding-inline:4px;scrollbar-width:thin}
+  .tab{font-size:22px;white-space:nowrap;flex-shrink:0;min-height:44px;padding:4px 12px}
+  .chain{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .slot{min-height:104px;padding:6px 4px;align-items:center;text-align:center;gap:4px;border-width:2px}
+  .slot .step{display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1;max-width:100%}
+  .slot .step .sn{overflow-wrap:anywhere;hyphens:manual;max-width:100%}
+  .slot .step .n{font-size:24px}
+  .slot .step .sep{display:none}
+  .slot .ask,.slot .why{display:none}
+  .slot .got{flex-direction:column;gap:2px;font-size:11.5px;line-height:1.1}
+  .slot .got svg{width:30px;height:30px}
+  .whybox{display:block;background:var(--card);border:2px solid var(--ok);border-radius:8px 16px 10px 14px/14px 10px 16px 8px;padding:10px 12px;font-size:15px;line-height:1.35;min-height:44px}
+  .whybox.ask{border-color:var(--pen);border-style:dashed}
+  .bin{position:sticky;bottom:0;z-index:5;background:var(--paper);border-top:2.5px solid var(--ink);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:8px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));gap:6px;box-shadow:0 -6px 14px rgba(21,32,26,.08)}
+  .bin .kick{font-size:18px !important}
+  .hint{font-size:21px;min-height:24px}
+  .parts{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding:4px 2px 6px;scroll-snap-type:x proximity}
+  .part{flex-shrink:0;padding:6px 10px;font-size:15px;scroll-snap-align:start}
+  .part svg{width:26px;height:26px}
+  #win{padding-bottom:24px}
+}
+@media (prefers-reduced-motion:reduce){.slot.wrong{animation:none}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);background:var(--card);border:2px dashed var(--pen);border-radius:8px 14px 8px 12px;padding:6px 12px;min-height:40px;cursor:pointer}
+.reset:focus-visible,.taal:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.reset-onder{align-self:flex-start;margin-top:8px}
+.topbar{display:flex;justify-content:flex-end}
+.taal{font-family:var(--body);font-size:15px;font-weight:700;color:var(--pen);text-underline-offset:3px;padding:8px 2px;min-height:40px;display:inline-flex;align-items:center}
+.terug{font-weight:700;color:var(--pen);text-underline-offset:3px}
+.badgebox canvas{width:min(100%,420px)}
+</style>
+<main class="wrap" lang="nl" style="max-width:620px">
+  <div class="topbar"><a class="taal" id="taal" href="badge-maker-en.html" lang="en" hreflang="en">English</a></div>
+  <div class="kick">opendag Technische Informatica · 7 november 2026</div>
+  <h1>Jouw <span class="hl">badge</span></h1>
+  <div id="met" hidden style="display:flex;flex-direction:column;gap:16px">
+    <p style="margin:0">Je hebt alle zes slimme systemen gebouwd in <b>Bouw een systeem</b>. Zet je naam erop en bewaar de badge op je telefoon.</p>
+    <div id="badgeslot"></div>
+    <p class="small" style="margin:0">Op een iPhone of Android kies je na "Bewaar je badge" voor "Afbeelding bewaren" of "Opslaan".</p>
+  </div>
+  <div id="zonder" hidden style="display:flex;flex-direction:column;gap:12px">
+    <p style="margin:0">Deze pagina maakt je badge nadat je <b>Bouw een systeem</b> helemaal hebt uitgespeeld. Scan daarna de QR-code op het scherm.</p>
+    <a class="btn" href="bouw-een-systeem.html" style="text-decoration:none">Speel Bouw een systeem →</a>
+  </div>
+  <p class="small" style="margin:0">Je naam wordt nergens opgeslagen of verstuurd. Hij staat alleen op de afbeelding die je zelf bewaart.</p>
+  <a class="terug" href="samenvatting.html">Nog even terugkijken: alles van de opendag →</a>
+</main>
+<script>
+const ICON={
+ camera:'<path d="M8 20h10l4-6h20l4 6h10v30H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="34" r="9" fill="none" stroke="currentColor" stroke-width="4"/>',
+ afstand:'<path d="M10 32h8M24 18c8 8 8 20 0 28M34 12c12 12 12 28 0 40M44 6c16 16 16 36 0 52" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ hart:'<path d="M32 54C14 42 6 32 6 22c0-8 6-14 13-14 6 0 10 4 13 8 3-4 7-8 13-8 7 0 13 6 13 14 0 10-8 20-26 32z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M14 30h10l4-8 6 16 4-8h12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+ temp:'<path d="M26 10a6 6 0 0112 0v28a11 11 0 11-12 0z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v24" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ chip:'<rect x="18" y="18" width="28" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 18V8M32 18V8M40 18V8M24 46v10M32 46v10M40 46v10M18 26H8M18 38H8M46 26h10M46 38h10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ laptop:'<rect x="12" y="12" width="40" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M4 50h56l-4-8H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>',
+ speaker:'<path d="M8 24h10l14-12v40L18 40H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M42 22c5 5 5 15 0 20M50 14c10 10 10 26 0 36" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ motor:'<circle cx="32" cy="32" r="18" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="32" r="5" fill="currentColor"/><path d="M32 14v-8M50 32h8M32 50v8M14 32H6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ tril:'<rect x="22" y="10" width="20" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="4"/><path d="M12 22l-4 4 4 4-4 4 4 4M52 22l4 4-4 4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+ wifi:'<path d="M8 26c14-14 34-14 48 0M16 34c9-9 23-9 32 0M24 42c4-4 12-4 16 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="50" r="4" fill="currentColor"/>',
+ bt:'<path d="M20 20l24 24-12 12V8l12 12-24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+ app:'<rect x="18" y="6" width="28" height="52" rx="5" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 18h12M26 28h12M26 38h6" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ dash:'<path d="M10 50V14M10 50h46" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M16 42l10-12 8 6 14-18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+ led:'<path d="M22 30a10 10 0 0120 0v10H22z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 40v14M36 40v14M32 8v6M14 16l4 4M50 16l-4 4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ klep:'<path d="M6 32h18M40 32h18" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M24 22l16 20M24 42l16-20" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 22v20M40 22v20M32 32V12M24 12h16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
+ vocht:'<path d="M32 6C24 18 16 26 16 36a16 16 0 0032 0c0-10-8-18-16-30z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M24 38a8 8 0 008 8" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ pomp:'<circle cx="26" cy="36" r="14" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 22V10h28M50 10v8M46 22l4 6 4-6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 36h12M26 30v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ lora:'<path d="M32 30v28M24 58h16" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="24" r="4" fill="currentColor"/><path d="M20 12c-6 6-6 18 0 24M44 12c6 6 6 18 0 24M12 4c-11 11-11 29 0 40M52 4c11 11 11 29 0 40" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ display:'<rect x="6" y="12" width="52" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M16 22h14M16 30h22M16 38h10M32 46v10M22 56h20" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ peil:'<path d="M20 6v52M14 14h6M14 24h6M14 34h6M14 44h6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M28 40c4-4 8-4 12 0s8 4 12 0M28 50c4-4 8-4 12 0s8 4 12 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>',
+ modem:'<rect x="10" y="28" width="44" height="22" rx="4" fill="none" stroke="currentColor" stroke-width="4"/><path d="M20 28V14M44 28V14M18 39h4M28 39h4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><text x="36" y="45" font-size="12" font-weight="700" fill="currentColor" font-family="sans-serif">4G</text>',
+ kabel:'<rect x="20" y="6" width="24" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="4"/><path d="M26 6v-0M28 12v6M32 12v6M36 12v6M32 26v8c0 10-20 6-20 16v8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+};
+const $=id=>document.getElementById(id);
+const OPENDAG='20261107';
+const MAAND=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+const datumTekst=d=>(+d.slice(6,8))+' '+MAAND[+d.slice(4,6)-1]+' '+d.slice(0,4);
+const BADGE_SYS=[['camera','Deurbel'],['motor','Robotauto'],['hart','Hartmonitor'],['pomp','Beregening'],['led','Verkeerslicht'],['peil','Dijkbewaking']];
+
+function iconImg(k){return new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);
+  im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" color="#15201A" style="color:#15201A">${ICON[k]}</svg>`);});}
+async function tekenBadge(cv,b){
+  try{await Promise.all([document.fonts.load('700 60px Caveat'),document.fonts.load('700 40px "Atkinson Hyperlegible"'),document.fonts.load('400 30px "Atkinson Hyperlegible"')]);}catch(e){}
+  const icons=await Promise.all(BADGE_SYS.map(([k])=>iconImg(k)));
+  const W=1080,H=1350; cv.width=W; cv.height=H; const g=cv.getContext('2d');
+  const hand=(sz,w=700)=>`${w} ${sz}px Caveat, "Segoe Print", cursive`, body=(sz,w=700)=>`${w} ${sz}px "Atkinson Hyperlegible", "Segoe UI", sans-serif`;
+  g.fillStyle='#FCF8EC'; g.fillRect(0,0,W,H);
+  g.strokeStyle='#E2E9F2'; g.lineWidth=2; for(let x=0;x<W;x+=36){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();} for(let y=0;y<H;y+=36){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.strokeStyle='#15201A'; g.lineWidth=8; g.beginPath(); g.roundRect?g.roundRect(28,28,W-56,H-56,28):g.rect(28,28,W-56,H-56); g.stroke();
+  g.textAlign='center'; g.textBaseline='alphabetic';
+  g.save(); g.translate(W/2,128); g.rotate(-0.025); g.fillStyle='#24408E'; g.font=hand(48); g.fillText('opendag Technische Informatica · Saxion',0,0); g.restore();
+  let tf=156; g.font=hand(tf); while(g.measureText('Systeembouwer').width>W-150&&tf>90){tf-=4; g.font=hand(tf);} const tw=g.measureText('Systeembouwer').width;
+  g.fillStyle='rgba(255,214,0,.6)'; g.fillRect(W/2-tw/2-14,232,tw+28,60);
+  g.fillStyle='#15201A'; g.fillText('Systeembouwer',W/2,280);
+  const naam=(b.naam||'').trim();
+  if(naam){ g.font=body(54); let fs=54; while(g.measureText(naam).width>W-160&&fs>28){fs-=2; g.font=body(fs);} g.fillText(naam,W/2,370); }
+  g.font=body(34,400); g.fillStyle='#33403A'; g.fillText(naam?'bouwde alle zes slimme systemen':'alle zes slimme systemen gebouwd',W/2,naam?428:390);
+  const tw2=290,th=250,gap=34,x0=(W-3*tw2-2*gap)/2,y0=490;
+  BADGE_SYS.forEach(([k,n],i)=>{const x=x0+(i%3)*(tw2+gap), y=y0+Math.floor(i/3)*(th+gap);
+    g.save(); g.translate(x+tw2/2,y+th/2); g.rotate([-0.02,0.015,-0.01,0.02,-0.015,0.01][i]);
+    g.fillStyle='#FFFFFF'; g.strokeStyle='#12804A'; g.lineWidth=5; g.beginPath(); g.roundRect?g.roundRect(-tw2/2,-th/2,tw2,th,18):g.rect(-tw2/2,-th/2,tw2,th); g.fill(); g.stroke();
+    if(icons[i]) g.drawImage(icons[i],-56,-th/2+30,112,112);
+    g.fillStyle='#15201A'; g.font=hand(42); g.fillText(n,0,th/2-30);
+    g.fillStyle='#12804A'; g.beginPath(); g.arc(tw2/2-30,-th/2+30,20,0,7); g.fill();
+    g.strokeStyle='#FFFFFF'; g.lineWidth=5; g.lineCap='round'; g.lineJoin='round'; g.beginPath(); g.moveTo(tw2/2-40,-th/2+30); g.lineTo(tw2/2-32,-th/2+38); g.lineTo(tw2/2-19,-th/2+22); g.stroke();
+    g.restore();});
+  g.fillStyle='#15201A'; g.font=body(42); g.fillText(`30 onderdelen goed   ·   ${b.m} ${b.m===1?'misser':'missers'}`,W/2,1170);
+  g.fillStyle='#33403A'; g.font=hand(40); g.fillText('opendag '+datumTekst(b.d)+' · TI test tot het werkt',W/2,1240);
+}
+function badgeBox(el,b){
+  el.innerHTML=`<div class="badgebox"><canvas id="badgecv" role="img" aria-label="Badge Systeembouwer, opendag ${datumTekst(b.d)}, ${b.m} ${b.m===1?'misser':'missers'}"></canvas>
+   <div class="badgeform"><label for="bnaam">Je naam op de badge (mag ook leeg)<input id="bnaam" maxlength="24" autocomplete="off"></label>
+   <button class="btn" id="bsave">Bewaar je badge</button></div></div>`;
+  const cv=$('badgecv'); let to=0;
+  tekenBadge(cv,b);
+  $('bnaam').oninput=()=>{clearTimeout(to); to=setTimeout(()=>tekenBadge(cv,{...b,naam:$('bnaam').value}),150);};
+  $('bsave').onclick=async()=>{ await tekenBadge(cv,{...b,naam:$('bnaam').value});
+    cv.toBlob(async blob=>{ const f=new File([blob],'badge-systeembouwer.png',{type:'image/png'});
+      const dl=window.claude&&window.claude.use?await window.claude.use('downloads').catch(()=>null):null;
+      if(dl){ try{ await dl.save({filename:'badge-systeembouwer.png',data:blob}); }catch(e){} return; }
+      try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:'Mijn badge Systeembouwer'}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },'image/png'); };
+}
+
+/* #badge=<missers> komt uit de QR-code op het scherm van de Raspberry Pi */
+const BH=/^#badge=(\d{1,3})$/.exec(location.hash);
+if(BH){ $('met').hidden=false; badgeBox($('badgeslot'),{m:+BH[1],d:OPENDAG}); }
+else { $('zonder').hidden=false; }
+$('taal').href=$('taal').getAttribute('href')+location.hash;
+</script>
+</body>
+</html>
